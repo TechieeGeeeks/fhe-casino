@@ -73,6 +73,7 @@ import React from "react";
 const CustomTable = () => {
   return (
     <div className="grid place-items-center w-full max-w-5xl">
+      <h1 className="font-semibold text-2xl w-full my-8">Live Bets</h1>
       <Table>
         <TableCaption>A list of your recent transactions.</TableCaption>
         <TableHeader>
