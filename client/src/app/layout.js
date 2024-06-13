@@ -5,6 +5,7 @@ import { DM_Sans } from "next/font/google";
 
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
+import Footer from "@/components/Footer";
 
 const dmSans = DM_Sans({ subsets: ["latin"] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
         {children}
         <div id="drawer"></div>
         <div id="modal"></div>
+        <Footer />
         <Toaster />
       </body>
     </html>

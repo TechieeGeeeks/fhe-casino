@@ -61,16 +61,6 @@ const Page = () => {
           </p>
         </section>
       </div>
-
-      <footer className="z-30 bg-white px-5 py-5 text-center font-base m500:text-sm">
-        Made with love by team{" "}
-        <a
-          href="https://github.com/ekmas/neobrutalism-components"
-          className="underline font-heading">
-          FHECasino
-        </a>
-        .
-      </footer>
     </div>
   );
 };
@@ -82,13 +72,13 @@ const items = [
     title: "Coin Flip",
     displayIcon: <RiCopperCoinLine className="text-[3rem]" />,
     hoverIcon: <LuCoins className="text-[6rem]" />,
-    href: "/coin-flip",
+    href: "/games/coin-flip",
   },
   {
     title: "Poker",
     displayIcon: <GiPokerHand className="text-[3rem]" />,
     hoverIcon: <GiPokerHand className="text-[6rem]" />,
-    href: "/poker-hand",
+    href: "/games/poker-hand",
   },
   {
     title: "Slots",
@@ -100,24 +90,24 @@ const items = [
     title: "Hand Rock",
     displayIcon: <FaHandRock className="text-[4rem]" />,
     hoverIcon: <LiaHandRock className="text-[6rem]" />,
-    href: "/hand-rock",
+    href: "/games/hand-rock",
   },
   {
     title: "Dice",
     displayIcon: <FaDice className="text-[4rem]" />,
     hoverIcon: <FaDice className="text-[6rem]" />,
-    href: "/dice",
+    href: "/games/dice",
   },
   {
     title: "Mines",
     displayIcon: <GiRollingBomb className="text-[4rem]" />,
     hoverIcon: <GiRollingBomb className="text-[6rem]" />,
-    href: "/dice",
+    href: "/games/dice",
   },
   {
     title: "Plinko",
     displayIcon: <GiPoolTriangle className="text-[4rem]" />,
     hoverIcon: <GiPoolTriangle className="text-[6rem]" />,
-    href: "/dice",
+    href: "/games/dice",
   },
 ];
