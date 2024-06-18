@@ -1,5 +1,8 @@
-// import SlotMachineABIJSON from "@/assets/Slotmachine.json";
-// export const contractABI = SlotMachineABIJSON;
-export const conflipABI = "jdsfvbk";
+import ConflipABI from "@/abi/coinFlip.json";
+export const conflipABI = ConflipABI;
+export const coinFlipAddress = "0x63E32380DEE66E462b20dEb446d0fAD6B40a0fEA";
 
-export const coinFlipAddress = "0x8647fE480Cca90A7D8aa0d81971E40cDF3f660D4";
+import TokenABI from "@/abi/token.json";
+export const tokenABI = TokenABI;
+export const tokenContractAddress =
+  "0x7E79b3e7c838452918F00999BfC906EaeAe047e4";
