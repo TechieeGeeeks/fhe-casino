@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 
 import reviews from "@/data/reviews";
@@ -27,7 +28,8 @@ export default function Home() {
 
         <Link
           className="flex items-center rounded-base border-2 font-base border-black bg-main px-10 py-3 text-[22px] shadow-base transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none m800:px-8 m800:py-2.5 m800:text-lg m400:px-6 m400:py-2 m400:text-base"
-          href={"/games"}>
+          href={"/games"}
+        >
           Play now
           <img
             className="ml-[15px] w-[18px] m400:ml-4 m400:w-[15px]"
@@ -35,10 +37,47 @@ export default function Home() {
             alt="arrow"
           />
         </Link>
+        {/* {authenticated ? (
+          <div
+            className="flex items-center rounded-base border-2 font-base border-black bg-main px-10 py-3 text-[22px] shadow-base transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none m800:px-8 m800:py-2.5 m800:text-lg m400:px-6 m400:py-2 m400:text-base"
+            onClick={logout}
+          >
+            Log Out
+            <img
+              className="ml-[15px] w-[18px] m400:ml-4 m400:w-[15px]"
+              src={arrow.src}
+              alt="arrow"
+            />
+          </div>
+        ) : (
+          <div
+            className="flex items-center rounded-base border-2 font-base border-black bg-main px-10 py-3 text-[22px] shadow-base transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none m800:px-8 m800:py-2.5 m800:text-lg m400:px-6 m400:py-2 m400:text-base"
+            onClick={login}
+          >
+            Log in
+            <img
+              className="ml-[15px] w-[18px] m400:ml-4 m400:w-[15px]"
+              src={arrow.src}
+              alt="arrow"
+            />
+          </div>
+        )} */}
+        {/* <div
+          className="flex items-center rounded-base border-2 font-base border-black bg-main px-10 py-3 text-[22px] shadow-base transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none m800:px-8 m800:py-2.5 m800:text-lg m400:px-6 m400:py-2 m400:text-base"
+          onClick={login}
+        >
+          Play now
+          <img
+            className="ml-[15px] w-[18px] m400:ml-4 m400:w-[15px]"
+            src={arrow.src}
+            alt="arrow"
+          />
+        </div> */}
         <svg
           className="absolute left-[20%] top-[25%] w-[80px] m1500:left-[15%] m1500:top-[20%] m1500:w-[50px] m1100:hidden"
           viewBox="0 0 100 100"
-          xmlns="http://www.w3.org/2000/svg">
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M46.9395 14.107L50 4.80124L53.0605 14.107C58.1702 29.6438 70.3562 41.8298 85.893 46.9395L95.1988 50L85.893 53.0605C70.3562 58.1702 58.1702 70.3562 53.0605 85.893L50 95.1988L46.9395 85.893C41.8298 70.3562 29.6438 58.1702 14.107 53.0605L4.80124 50L14.107 46.9395C29.6438 41.8298 41.8298 29.6438 46.9395 14.107Z"
             className="fill-main"
@@ -108,7 +147,8 @@ export default function Home() {
                   {card.map(({ jobTitle, pfp, fullName, review }, index) => (
                     <div
                       className="m1000:min-h-20 m1000:w-2/3 m1000:mx-auto m500:w-full mb-4 min-h-48 w-full rounded-base border-2 border-black bg-bg p-5 shadow-base lg:mb-8"
-                      key={index}>
+                      key={index}
+                    >
                       <div className="flex items-center gap-5">
                         <img
                           className="h-12 w-12 rounded-base border-2 border-black"
@@ -138,7 +178,8 @@ export default function Home() {
             <Accordion
               className="text-base sm:text-lg"
               type="single"
-              collapsible>
+              collapsible
+            >
               <AccordionItem className="mb-2" value="item-1">
                 <AccordionTrigger>Is dark mode available?</AccordionTrigger>
                 <AccordionContent className="text-sm sm:text-base">
@@ -182,7 +223,8 @@ export default function Home() {
                   <a
                     target="_blank"
                     className="underline font-heading"
-                    href="https://github.com/ekmas/neobrutalism-components/blob/main/CONTRIBUTING.md">
+                    href="https://github.com/ekmas/neobrutalism-components/blob/main/CONTRIBUTING.md"
+                  >
                     contributing.md
                   </a>{" "}
                   to get started.
@@ -199,7 +241,8 @@ export default function Home() {
 
           <Link
             className="mt-[50px] flex font-base items-center rounded-base border-2 border-black bg-white px-10 py-3 text-[22px] shadow-base transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none m800:px-8 m800:py-2.5 m800:text-lg m400:px-6 m400:py-2 m400:text-base"
-            href={"/games"}>
+            href={"/games"}
+          >
             Play now
             <img
               className="ml-[15px] w-[18px] m400:ml-4 m400:w-[15px]"

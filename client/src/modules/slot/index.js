@@ -10,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import PlayButton from "@/components/PlayButton";
 
 const Index = () => {
   const [isRunning, setIsRunning] = useState(false);
@@ -46,12 +47,7 @@ const Index = () => {
   useEffect(() => {
     if (isRunning) {
       const timeoutId = setTimeout(() => {
-        setNumbers([
-          2, 2, 2,
-          // generateRandomNumber(),
-          // generateRandomNumber(),
-          // generateRandomNumber(),
-        ]);
+        setNumbers([2, 2, 2]);
         setIsRunning(false);
       }, 2000);
 
@@ -85,59 +81,16 @@ const Index = () => {
               type={"number"}
               value={bet}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <SlotInputForm
-                id={"totalwager"}
-                label={"Total Wager"}
-                onChange={(e) => setTotalwager(e.target.value)}
-                placeholder={"-"}
-                disabled={true}
-                type={"number"}
-                value={totalwager}
-              />{" "}
-              <SlotInputForm
-                id={"maxpayout"}
-                label={"Max Payout"}
-                onChange={(e) => setMaxPayout(e.target.value)}
-                placeholder={"-"}
-                disabled={true}
-                type={"number"}
-                value={maxPayout}
-              />
-            </div>
-
-            <Accordion
-              className="w-full lg:w-[unset] bg-white border-none shadow-none"
-              type="single"
-              collapsible>
-              <AccordionItem className="max-w-full" value="item-1">
-                <AccordionTrigger className="bg-transparent">
-                  Advanced
-                </AccordionTrigger>
-                <AccordionContent className="grid grid-cols-2 gap-4">
-                  <SlotInputForm
-                    id={"stoponloss"}
-                    label={"Stop on Loss"}
-                    onChange={(e) => setStopOnLoss(e.target.value)}
-                    placeholder={"-"}
-                    type={"number"}
-                    value={stopOnLoss}
-                  />{" "}
-                  <SlotInputForm
-                    id={"takeprofit"}
-                    label={"Take Profit"}
-                    onChange={(e) => setTakeprofit(e.target.value)}
-                    placeholder={"-"}
-                    type={"number"}
-                    value={takeprofit}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            <Button onClick={handlePlay} className="bg-main">
-              Play
-            </Button>
+            <SlotInputForm
+              id={"totalwager"}
+              label={"Total Wager"}
+              onChange={(e) => setTotalwager(e.target.value)}
+              placeholder={"-"}
+              disabled={true}
+              type={"number"}
+              value={totalwager}
+            />{" "}
+            <PlayButton handler={handlePlay} />
           </div>
           <div className="md:flex hidden relative">
             <img

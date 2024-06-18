@@ -15,6 +15,7 @@ import HandRock from "@/modules/hand-rock";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import GameInputForm from "@/components/GameInputForm";
+import PlayButton from "@/components/PlayButton";
 
 const Page = () => {
   const [wager, setWager] = useState(0);
@@ -28,7 +29,7 @@ const Page = () => {
   const [selectValue, setSelectValue] = useState("rock");
   const [userChoice, setUserChoice] = useState(0);
   const [gameOutcome, setGameOutcome] = useState(null);
-  const [result, setResult] = useState(1)
+  const [result, setResult] = useState(1);
 
   const images = [
     "/rock-hand/rock.svg",
@@ -55,9 +56,9 @@ const Page = () => {
 
   const stopPlaying = () => {
     setIsPlaying(false);
-    const computerChoice = Math.floor(Math.random() * 3); // Randomly choose between 0, 1, 
+    const computerChoice = Math.floor(Math.random() * 3); // Randomly choose between 0, 1,
     // Determine game result
-    setResult(computerChoice)
+    setResult(computerChoice);
     const gameResult = determineGameResult(userChoice, computerChoice);
 
     if (gameResult === "win") {
@@ -132,7 +133,7 @@ const Page = () => {
                 value={bet}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4">
                 <GameInputForm
                   id={"totalwager"}
                   label={"Total Wager"}
@@ -142,21 +143,14 @@ const Page = () => {
                   type={"number"}
                   value={totalwager}
                 />
-                <GameInputForm
-                  id={"maxpayout"}
-                  label={"Max Payout"}
-                  onChange={(e) => setMaxPayout(e.target.value)}
-                  placeholder={"-"}
-                  disabled={true}
-                  type={"number"}
-                  value={maxPayout}
-                />
+
                 <div className="grid place-items-start gap-2">
                   <p>Select your move</p>
                   <RadioGroup
                     value={selectValue}
                     onValueChange={handleUserChoice}
-                    className="flex">
+                    className="flex"
+                  >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="rock" id="rock" />
                       <Label htmlFor="rock" className="cursor-pointer">
@@ -179,38 +173,7 @@ const Page = () => {
                 </div>
               </div>
 
-              <Accordion
-                className="w-full lg:w-[unset] bg-white border-none shadow-none"
-                type="single"
-                collapsible>
-                <AccordionItem className="max-w-full" value="item-1">
-                  <AccordionTrigger className="bg-transparent">
-                    Advanced
-                  </AccordionTrigger>
-                  <AccordionContent className="grid grid-cols-2 gap-4">
-                    <GameInputForm
-                      id={"stoponloss"}
-                      label={"Stop on Loss"}
-                      onChange={(e) => setStopOnLoss(e.target.value)}
-                      placeholder={"-"}
-                      type={"number"}
-                      value={stopOnLoss}
-                    />
-                    <GameInputForm
-                      id={"takeprofit"}
-                      label={"Take Profit"}
-                      onChange={(e) => setTakeprofit(e.target.value)}
-                      placeholder={"-"}
-                      type={"number"}
-                      value={takeprofit}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              <Button onClick={playGame} className="bg-main w-full">
-                Play
-              </Button>
+              <PlayButton handler={playGame} />
             </div>
           </div>
           <div className="md:flex hidden w-full min-h-full items-center justify-center">

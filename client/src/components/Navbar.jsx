@@ -22,22 +22,20 @@ function Navbar() {
         </div>
 
         <div className="flex items-center gap-10 m900:hidden">
-          <Link className="text-xl font-base" href="/docs">
+          {/* <Link className="text-xl font-base" href="/docs">
             New Geneartions
-          </Link>
+          </Link> */}
 
-          <Link className="text-xl font-base" href="/templates">
+          {/* <Link className="text-xl font-base" href="/templates">
             Docs
-          </Link>
+          </Link> */}
 
-          <Link className="text-xl font-base" href="/templates">
+          {/* <Link className="text-xl font-base" href="/templates">
             Grants
-          </Link>
+          </Link> */}
         </div>
 
         <NavDropdown />
-
-       
       </div>
     </nav>
   );

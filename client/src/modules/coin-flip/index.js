@@ -40,27 +40,25 @@ const CoinFlip = ({ isFlipping, result, setUserChoiced }) => {
 
   return (
     <div className="flex flex-col items-center justify-between h-full">
-      <motion.div
-        animate={controls}
-        className="bg-main border-2 border-black shadow-base w-52 aspect-square rounded-full flex items-center justify-center">
-        {result}
-      </motion.div>
-
-      <div>
-        <RadioGroup
-          // defaultValue="comfortable"
-          className="flex"
-          onValueChange={(e) => setUserChoiced(e)}>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="heads" id="r1" />
-            <Label htmlFor="r1">Heads</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="tails" id="r2" />
-            <Label htmlFor="r2">Tails</Label>
-          </div>
-        </RadioGroup>
-      </div>
+      {result === "loading" ? (
+        <motion.div
+          animate={controls}
+          className={`${
+            result === "Tails" ? "" : "bg-main"
+          } border-2 border-black shadow-base rounded-full flex items-center justify-center h-full aspect-square`}
+        >
+          {"Heads"}
+        </motion.div>
+      ) : (
+        <motion.div
+          animate={controls}
+          className={`${
+            result === "Tails" ? "bg-white" : "bg-main"
+          } border-2 border-black shadow-base rounded-full flex items-center justify-center h-full aspect-square`}
+        >
+          {result}
+        </motion.div>
+      )}
     </div>
   );
 };

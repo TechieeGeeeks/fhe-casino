@@ -1,16 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import CoinFlipForm from "@/modules/coin-flip/coinFlipInputForm";
 import { toast } from "@/components/ui/use-toast";
 import { confetti } from "@/utils/confetii";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import CoinFlip from "@/modules/coin-flip";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import PlayButton from "@/components/PlayButton";
+import { fetchTokens } from "@/utils/helper";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 
 const Index = () => {
   const [isFlipping, setIsFlipping] = useState(false);
@@ -23,22 +21,43 @@ const Index = () => {
   const [stopOnLoss, setStopOnLoss] = useState();
   const [takeprofit, setTakeprofit] = useState();
   const [userChoiced, setUserChoiced] = useState();
+  const [tokens, setTokens] = useState("0");
+  const { login, authenticated, logout, ready } = usePrivy();
+  const { wallets } = useWallets();
+  const w0 = wallets[0];
+
+  useEffect(() => {
+    if (ready && authenticated && w0?.address !== undefined) {
+      if (ready) {
+        fetchTokens(w0, setTokens);
+      }
+    }
+  }, [w0]);
 
   useEffect(() => {
     if (userChoiced?.toLowerCase() === result.toLowerCase()) {
-      console.log(userChoiced, result)
+      console.log(userChoiced, result);
       confetti();
       toast({
         variant: "white",
         title: "🎉🎉🎊Wohoooo!, You have won the toss",
       });
+      // setTimeout(() => {
+      //   setResult("Coin");
+      // }, 2000);
     }
-  }, [result, userChoiced]);
+  }, [result]);
 
   const startFlipping = () => {
     if (!wager) {
       toast({
         title: "Please, add valid wager",
+      });
+      return;
+    }
+    if (!bet || Number(bet) <= 0) {
+      toast({
+        title: "Please, place valid bet!",
       });
       return;
     }
@@ -50,7 +69,7 @@ const Index = () => {
     }
     setIsFlipping(true);
     setIsBtnDisbled(true);
-    setResult("🪙");
+    setResult("loading");
   };
 
   useEffect(() => {
@@ -70,8 +89,8 @@ const Index = () => {
   return (
     <div>
       <main className="relative flex flex-col items-center justify-center bg-white px-5 py-[150px] text-center font-bold bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px]">
-        <div className="grid gap-4 grid-cols-2">
-          <div className="max-w-[70%] flex flex-col gap-4">
+        <div className="grid gap-12 grid-cols-2">
+          <div className="min-w-[350px] flex flex-col gap-4">
             <CoinFlipForm
               id={"wager"}
               label={"Wager"}
@@ -89,60 +108,36 @@ const Index = () => {
               value={bet}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <CoinFlipForm
-                id={"totalwager"}
-                label={"Total Wager"}
-                onChange={(e) => setTotalwager(e.target.value)}
-                placeholder={"-"}
-                disabled={true}
-                type={"number"}
-                value={totalwager}
-              />{" "}
-              <CoinFlipForm
-                id={"maxpayout"}
-                label={"Max Payout"}
-                onChange={(e) => setMaxPayout(e.target.value)}
-                placeholder={"-"}
-                disabled={true}
-                type={"number"}
-                value={maxPayout}
-              />
+            <CoinFlipForm
+              id={"totalwager"}
+              label={"Total Wager"}
+              onChange={(e) => setTotalwager(e.target.value)}
+              placeholder={"-"}
+              disabled={true}
+              type={"number"}
+              value={totalwager}
+            />
+
+            <div>
+              <RadioGroup
+                // defaultValue="comfortable"
+                className="flex"
+                onValueChange={(e) => setUserChoiced(e)}
+              >
+                <div className={`flex items-center space-x-2`}>
+                  <RadioGroupItem value="heads" id="r1" />
+                  <Label htmlFor="r1">Heads</Label>
+                </div>
+                <div className={`flex items-center space-x-2`}>
+                  <RadioGroupItem value="tails" id="r2" />
+                  <Label htmlFor="r2">Tails</Label>
+                </div>
+              </RadioGroup>
             </div>
 
-            <Accordion
-              className="w-full lg:w-[unset] bg-white border-none shadow-none"
-              type="single"
-              collapsible>
-              <AccordionItem className="max-w-full" value="item-1">
-                <AccordionTrigger className="bg-transparent">
-                  Advanced
-                </AccordionTrigger>
-                <AccordionContent className="grid grid-cols-2 gap-4">
-                  <CoinFlipForm
-                    id={"stoponloss"}
-                    label={"Stop on Loss"}
-                    onChange={(e) => setStopOnLoss(e.target.value)}
-                    placeholder={"-"}
-                    type={"number"}
-                    value={stopOnLoss}
-                  />{" "}
-                  <CoinFlipForm
-                    id={"takeprofit"}
-                    label={"Take Profit"}
-                    onChange={(e) => setTakeprofit(e.target.value)}
-                    placeholder={"-"}
-                    type={"number"}
-                    value={takeprofit}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            <Button onClick={startFlipping} className="bg-main">
-              Play
-            </Button>
+            <PlayButton handler={startFlipping} tokens={tokens} />
           </div>
-          <div className="md:flex hidden relative">
+          <div className="md:flex relative">
             <CoinFlip
               isFlipping={isFlipping}
               result={result}

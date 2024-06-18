@@ -11,7 +11,16 @@ const CoinFlipForm = ({
   type,
   className,
   disabled,
+  isNegativeAllowed = false,
 }) => {
+  
+  const handleChange = (e) => {
+    const newValue = e.target.value;
+    if (isNegativeAllowed || newValue >= 0 || newValue === "") {
+      onChange(e);
+    }
+  };
+
   return (
     <div className="grid w-full place-items-start max-w-sm items-center gap-1.5">
       <Label htmlFor={id}>{label}</Label>
@@ -19,7 +28,7 @@ const CoinFlipForm = ({
         type={type}
         id={id}
         placeholder={placeholder}
-        onChange={onChange}
+        onChange={handleChange}
         className={className}
         value={value}
         disabled={disabled}
