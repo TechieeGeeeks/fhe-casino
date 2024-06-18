@@ -19,7 +19,7 @@ export default function NavDropdown() {
   const { login, authenticated, logout, ready } = usePrivy();
   const { wallets } = useWallets();
   const w0 = wallets[0];
-  const [tokens, setTokens] = useState('0')
+  const [tokens, setTokens] = useState("0");
   const accountAddress = w0?.address?.slice(0, 6)?.toLocaleLowerCase();
 
   const handleLogout = () => {
@@ -30,7 +30,7 @@ export default function NavDropdown() {
   useEffect(() => {
     if (ready && authenticated && w0?.address !== undefined) {
       if (ready) {
-        fetchTokens(w0, setTokens)
+        fetchTokens(w0, setTokens);
       }
     }
   }, [w0]);
@@ -47,7 +47,8 @@ export default function NavDropdown() {
         >
           <div className="flex items-center gap-2 hover:text-yellow-500 font-semibold">
             <GiToken className="" />
-            <p>{tokens}</p>
+
+            <p> {tokens === "0" ? "0" : tokens.slice(0, -18)}</p>
           </div>
 
           {/* {accountAddress}.... */}
