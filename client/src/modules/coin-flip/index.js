@@ -39,13 +39,13 @@ const CoinFlip = ({ isFlipping, result, setUserChoiced }) => {
   }, [isFlipping, controls]);
 
   return (
-    <div className="flex flex-col items-center justify-between h-full">
+    <div className="flex flex-col items-center justify-between absolute">
       {result === "loading" ? (
         <motion.div
           animate={controls}
           className={`${
             result === "Tails" ? "" : "bg-main"
-          } border-2 border-black shadow-base rounded-full flex items-center justify-center h-full aspect-square`}
+          } border-2 border-black shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
         >
           {"Heads"}
         </motion.div>
@@ -54,7 +54,7 @@ const CoinFlip = ({ isFlipping, result, setUserChoiced }) => {
           animate={controls}
           className={`${
             result === "Tails" ? "bg-white" : "bg-main"
-          } border-2 border-black shadow-base rounded-full flex items-center justify-center h-full aspect-square`}
+          } border-2 border-black shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
         >
           {result}
         </motion.div>

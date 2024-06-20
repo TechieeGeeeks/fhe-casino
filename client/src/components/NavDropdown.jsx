@@ -10,8 +10,10 @@ import Link from "next/link";
 
 import arrow from "../../public/svgs/arrow.svg";
 import { GiToken } from "react-icons/gi";
-import { fetchTokens } from "@/utils/helper";
+import { fetchTokens } from "@/utils/helpers/webHelpers";
 import { RiLuggageDepositFill } from "react-icons/ri";
+import { useDispatch, useSelector } from "react-redux";
+import { setToken } from "@/redux/slices/tokenSlice";
 // import arrow from '../../public'
 
 export default function NavDropdown() {
@@ -19,8 +21,11 @@ export default function NavDropdown() {
   const { login, authenticated, logout, ready } = usePrivy();
   const { wallets } = useWallets();
   const w0 = wallets[0];
-  const [tokens, setTokens] = useState("0");
+  // const [tokens, setTokens] = useState("0");
+  const {token} = useSelector((tok) => tok.tokens);
+  console.log(token);
   const accountAddress = w0?.address?.slice(0, 6)?.toLocaleLowerCase();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
     logout();
@@ -30,7 +35,7 @@ export default function NavDropdown() {
   useEffect(() => {
     if (ready && authenticated && w0?.address !== undefined) {
       if (ready) {
-        fetchTokens(w0, setTokens);
+        fetchTokens(w0, setToken, ready, dispatch);
       }
     }
   }, [w0]);
@@ -48,7 +53,7 @@ export default function NavDropdown() {
           <div className="flex items-center gap-2 hover:text-yellow-500 font-semibold">
             <GiToken className="" />
 
-            <p> {tokens === "0" ? "0" : tokens.slice(0, -18)}</p>
+            <p> {token === "0" ? "0" : token.slice(0, -18)}</p>
           </div>
 
           {/* {accountAddress}.... */}
