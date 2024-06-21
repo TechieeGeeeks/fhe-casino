@@ -1,6 +1,8 @@
 import { toast } from "@/components/ui/use-toast";
 import { Contract, ethers } from "ethers";
 import { coinFlipAddress, conflipABI } from "../contract";
+import { fetchTokens } from "./webHelpers";
+import { ready } from "localforage";
 
 export const playFlipGame = async (
   w0,
@@ -8,7 +10,13 @@ export const playFlipGame = async (
   bets,
   userChoiced,
   stopGain,
-  stopLoss
+  stopLoss,
+  setToken,
+  ready,
+  dispath,
+  stopFlipping,
+  setResult,
+  setOpen
 ) => {
   console.log("w0:", w0);
   console.log("wager:", wager);
@@ -19,23 +27,30 @@ export const playFlipGame = async (
 
   const provider = await w0?.getEthersProvider();
   const signer = await provider?.getSigner();
-  const address = w0.address;
 
   const contractWager = ethers.utils.parseUnits(wager, "ether");
   let contractStopGain = "0";
   let contractStopLoss = "0";
   if (stopGain) contractStopGain = ethers.utils.parseUnits(stopGain, "ether");
   if (stopLoss) contractStopLoss = ethers.utils.parseUnits(stopLoss, "ether");
-  const contractUserChoice = userChoiced === "Heads" ? false : true;
+  const contractUserChoice = userChoiced === "heads" ? true : false;
+
+  console.log("contractWager:", contractWager.toString());
+  console.log("contractStopGain:", contractStopGain.toString());
+  console.log("contractStopLoss:", contractStopLoss.toString());
+  console.log("contractUserChoice:", contractUserChoice);
 
   const contract = new Contract(coinFlipAddress, conflipABI, signer);
   try {
-    const txReceipt = await contract.play(
+    const txReceipt = await contract.CoinFlip_Play(
       contractWager,
       contractUserChoice,
       bets,
       contractStopGain,
-      contractStopLoss
+      contractStopLoss,
+      {
+        gasLimit: ethers.BigNumber.from("3000000"), 
+      }
     );
     // const bigNumber = ethers.BigNumber.from(balance);
 
@@ -75,9 +90,14 @@ export const playFlipGame = async (
           individualPayouts,
           numGames: numGames.toString(),
         });
+        // setResult(() => coinResults);
+        setOpen(true);
+        fetchTokens(w0, setToken, ready, dispath);
+        stopFlipping(coinResults);
       }
     );
   } catch (error) {
+    stopFlipping("Coin");
     console.log(error);
     toast({ title: "Error Occured!" });
   }

@@ -19,18 +19,20 @@ import {
 } from "@/components/ui/accordion";
 import GameInputForm from "@/components/GameInputForm";
 import { playFlipGame } from "@/utils/helpers/coinFlipHelpers";
+import CoinFlipAlert from "@/modules/coin-flip/coinFlipAlert";
 
 const Index = () => {
   const [isFlipping, setIsFlipping] = useState(false);
-  const [result, setResult] = useState("Coin");
+  const [result, setResult] = useState(["Coin"]);
   const [isBtnDisbled, setIsBtnDisbled] = useState(false);
-  const [wager, setWager] = useState();
+  const [wager, setWager] = useState(0);
   const [bet, setBet] = useState(1);
-  const [totalwager, setTotalwager] = useState();
-  const [maxPayout, setMaxPayout] = useState();
-  const [stopOnLoss, setStopOnLoss] = useState();
-  const [takeprofit, setTakeprofit] = useState();
+  const [totalwager, setTotalwager] = useState(0);
+  const [maxPayout, setMaxPayout] = useState(0);
+  const [stopOnLoss, setStopOnLoss] = useState(0);
+  const [takeprofit, setTakeprofit] = useState(0);
   const [userChoiced, setUserChoiced] = useState();
+  const [open, setOpen] = useState(false);
   // const [tokens, setTokens] = useState("0");
   const { login, authenticated, logout, ready } = usePrivy();
   const { wallets } = useWallets();
@@ -46,19 +48,19 @@ const Index = () => {
     }
   }, [w0]);
 
-  useEffect(() => {
-    if (userChoiced?.toLowerCase() === result.toLowerCase()) {
-      console.log(userChoiced, result);
-      confetti();
-      toast({
-        variant: "white",
-        title: "🎉🎉🎊Wohoooo!, You have won the toss",
-      });
-      // setTimeout(() => {
-      //   setResult("Coin");
-      // }, 2000);
-    }
-  }, [result]);
+  // useEffect(() => {
+  //   if (userChoiced?.toLowerCase() === result.toLowerCase()) {
+  //     console.log(userChoiced, result);
+  //     confetti();
+  //     toast({
+  //       variant: "white",
+  //       title: "🎉🎉🎊Wohoooo!, You have won the toss",
+  //     });
+  //     // setTimeout(() => {
+  //     //   setResult("Coin");
+  //     // }, 2000);
+  //   }
+  // }, [result]);
 
   const startFlipping = () => {
     if (!wager) {
@@ -82,8 +84,35 @@ const Index = () => {
     setIsFlipping(true);
     setIsBtnDisbled(true);
     setResult("loading");
-    playFlipGame(w0, wager, bet, userChoiced, takeprofit, stopOnLoss);
+    playFlipGame(
+      w0,
+      wager,
+      bet,
+      userChoiced,
+      takeprofit ? takeprofit : maxPayout.toString(),
+      stopOnLoss,
+      setToken,
+      ready,
+      dispath,
+      stopFlipping,
+      setResult,
+      setOpen
+    );
   };
+
+  useEffect(() => {
+    // Calculate total wager and round to nearest integer
+    setTotalwager(Math.round(wager * bet));
+  }, [wager, bet]);
+
+  useEffect(() => {
+    if (takeprofit !== 0 && takeprofit !== undefined) {
+      setMaxPayout(Math.round(takeprofit));
+    } else if (takeprofit === 0 && takeprofit !== undefined) {
+      const calculatedPayout = Math.round(wager * bet * 1.75);
+      setMaxPayout(calculatedPayout);
+    }
+  }, [wager, bet, takeprofit]);
 
   // useEffect(() => {
   //   if (isFlipping) {
@@ -93,16 +122,16 @@ const Index = () => {
   //   }
   // }, [isFlipping]);
 
-  const stopFlipping = () => {
+  const stopFlipping = (value) => {
     setIsBtnDisbled(false);
     setIsFlipping(false);
-    setResult("Tails");
+    setResult(value);
   };
 
   return (
     <>
-      {" "}
       <div>
+        <CoinFlipAlert open={open} setOpen={setOpen} coins={result} />
         <main className="relative flex flex-col items-center justify-center bg-white px-5 py-[150px] text-center font-bold bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px]">
           <div className="grid gap-4 grid-cols-2">
             <div className="max-w-[70%] flex flex-col gap-4">
@@ -127,20 +156,18 @@ const Index = () => {
                 <CoinFlipForm
                   id={"totalwager"}
                   label={"Total Wager"}
-                  onChange={(e) => setTotalwager(e.target.value)}
+                  onChange={(e) => {}}
                   placeholder={"-"}
-                  disabled={true}
-                  type={"number"}
                   value={totalwager}
+                  className={"cursor-not-allowed"}
                 />{" "}
                 <CoinFlipForm
                   id={"maxpayout"}
                   label={"Max Payout"}
-                  onChange={(e) => setMaxPayout(e.target.value)}
+                  onChange={(e) => {}}
                   placeholder={"-"}
-                  disabled={true}
-                  type={"number"}
                   value={maxPayout}
+                  className={"cursor-not-allowed"}
                 />
               </div>
 

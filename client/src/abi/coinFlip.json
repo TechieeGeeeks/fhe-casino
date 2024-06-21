@@ -33,9 +33,87 @@
 		"type": "error"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "requestID",
+				"type": "uint256"
+			}
+		],
+		"name": "AwaitingVRF",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "have",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "want",
+				"type": "uint256"
+			}
+		],
+		"name": "BlockNumberTooLow",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "wager",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isHeads",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint32",
+				"name": "numBets",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "stopGain",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "stopLoss",
+				"type": "uint256"
+			}
+		],
+		"name": "CoinFlip_Play",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "FailedInnerCall",
 		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "numBets",
+				"type": "uint32"
+			},
+			{
+				"internalType": "address",
+				"name": "playerAddress",
+				"type": "address"
+			}
+		],
+		"name": "getRandomNumberAndSettleBets",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -53,6 +131,27 @@
 			}
 		],
 		"name": "InvalidNumBets",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotAwaitingVRF",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "have",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "want",
+				"type": "address"
+			}
+		],
+		"name": "OnlyCoordinatorCanFulfill",
 		"type": "error"
 	},
 	{
@@ -89,6 +188,22 @@
 		"type": "error"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "wager",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "maxWager",
+				"type": "uint256"
+			}
+		],
+		"name": "WagerAboveLimit",
+		"type": "error"
+	},
+	{
 		"inputs": [],
 		"name": "ZeroWager",
 		"type": "error"
@@ -99,7 +214,7 @@
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "player",
+				"name": "playerAddress",
 				"type": "address"
 			},
 			{
@@ -148,7 +263,7 @@
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "player",
+				"name": "playerAddress",
 				"type": "address"
 			},
 			{
@@ -230,54 +345,8 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "wager",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "isHeads",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint32",
-				"name": "numBets",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint256",
-				"name": "stopGain",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "stopLoss",
-				"type": "uint256"
-			}
-		],
-		"name": "play",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "renounceOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bool",
-				"name": "value",
-				"type": "bool"
-			}
-		],
-		"name": "setIsInitialized",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -298,14 +367,20 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "receiver",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
-		"name": "withdrawProfits",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"name": "array",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -325,55 +400,11 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "coinFlipGames",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "wager",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "stopGain",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "stopLoss",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint64",
-				"name": "blockNumber",
-				"type": "uint64"
-			},
-			{
-				"internalType": "uint32",
-				"name": "numBets",
-				"type": "uint32"
-			},
-			{
-				"internalType": "bool",
-				"name": "isHeads",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
 				"name": "player",
 				"type": "address"
 			}
 		],
-		"name": "getGameState",
+		"name": "CoinFlip_GetState",
 		"outputs": [
 			{
 				"components": [
@@ -418,20 +449,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "initialBalance",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "isInitialized",
+		"name": "isInitialised",
 		"outputs": [
 			{
 				"internalType": "bool",
@@ -450,25 +468,6 @@
 				"internalType": "address",
 				"name": "",
 				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "randomNumbersArray",
-		"outputs": [
-			{
-				"internalType": "uint32",
-				"name": "",
-				"type": "uint32"
 			}
 		],
 		"stateMutability": "view",
