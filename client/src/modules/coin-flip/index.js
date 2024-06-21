@@ -56,7 +56,7 @@ const CoinFlip = ({ isFlipping, result, setUserChoiced }) => {
             result === "Tails" ? "bg-white" : "bg-main"
           } border-2 border-black shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
         >
-          {result[0]}
+          coin
         </motion.div>
       )}
     </div>
