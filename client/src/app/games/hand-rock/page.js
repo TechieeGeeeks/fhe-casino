@@ -134,15 +134,24 @@ const Page = () => {
               />
 
               <div className="grid gap-4">
-                <GameInputForm
-                  id={"totalwager"}
-                  label={"Total Wager"}
-                  onChange={(e) => setTotalwager(e.target.value)}
-                  placeholder={"-"}
-                  disabled={true}
-                  type={"number"}
-                  value={totalwager}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <GameInputForm
+                    id={"totalwager"}
+                    label={"Total Wager"}
+                    onChange={(e) => {}}
+                    placeholder={"-"}
+                    value={totalwager}
+                    className={"cursor-not-allowed"}
+                  />{" "}
+                  <GameInputForm
+                    id={"maxpayout"}
+                    label={"Max Payout"}
+                    onChange={(e) => {}}
+                    placeholder={"-"}
+                    value={maxPayout}
+                    className={"cursor-not-allowed"}
+                  />
+                </div>
 
                 <div className="grid place-items-start gap-2">
                   <p>Select your move</p>
@@ -173,10 +182,52 @@ const Page = () => {
                 </div>
               </div>
 
+              <Accordion
+                className="w-full lg:w-[unset] bg-white border-none shadow-none"
+                type="single"
+                collapsible
+              >
+                <AccordionItem className="max-w-full" value="item-1">
+                  <AccordionTrigger className="bg-transparent">
+                    Advanced
+                  </AccordionTrigger>
+                  <AccordionContent className="grid grid-cols-2 gap-4">
+                    <GameInputForm
+                      id={"stoponloss"}
+                      label={"Stop on Loss"}
+                      onChange={(e) => setStopOnLoss(e.target.value)}
+                      placeholder={"-"}
+                      type={"number"}
+                      value={stopOnLoss}
+                    />{" "}
+                    <GameInputForm
+                      id={"takeprofit"}
+                      label={"Take Profit"}
+                      onChange={(e) => setTakeprofit(e.target.value)}
+                      placeholder={"-"}
+                      type={"number"}
+                      value={takeprofit}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
               <PlayButton handler={playGame} />
             </div>
           </div>
-          <div className="md:flex hidden w-full min-h-full items-center justify-center">
+
+          <div className="md:flex hidden relative items-center">
+            <div className="w-[550px]">
+              <HandRock
+                images={images}
+                currentImageIndex={currentImageIndex}
+                userImage={userChoice}
+                isPlaying={isPlaying}
+                result={result}
+              />
+            </div>
+          </div>
+          {/* <div className="md:flex hidden w-full min-h-full items-center justify-center">
             <HandRock
               images={images}
               currentImageIndex={currentImageIndex}
@@ -184,7 +235,7 @@ const Page = () => {
               isPlaying={isPlaying}
               result={result}
             />
-          </div>
+          </div> */}
         </div>
       </main>
     </div>

@@ -81,15 +81,53 @@ const Index = () => {
               type={"number"}
               value={bet}
             />
-            <SlotInputForm
-              id={"totalwager"}
-              label={"Total Wager"}
-              onChange={(e) => setTotalwager(e.target.value)}
-              placeholder={"-"}
-              disabled={true}
-              type={"number"}
-              value={totalwager}
-            />{" "}
+            <div className="grid grid-cols-2 gap-4">
+              <SlotInputForm
+                id={"totalwager"}
+                label={"Total Wager"}
+                onChange={(e) => {}}
+                placeholder={"-"}
+                value={totalwager}
+                className={"cursor-not-allowed"}
+              />{" "}
+              <SlotInputForm
+                id={"maxpayout"}
+                label={"Max Payout"}
+                onChange={(e) => {}}
+                placeholder={"-"}
+                value={maxPayout}
+                className={"cursor-not-allowed"}
+              />
+            </div>
+            <Accordion
+              className="w-full lg:w-[unset] bg-white border-none shadow-none"
+              type="single"
+              collapsible
+            >
+              <AccordionItem className="max-w-full" value="item-1">
+                <AccordionTrigger className="bg-transparent">
+                  Advanced
+                </AccordionTrigger>
+                <AccordionContent className="grid grid-cols-2 gap-4">
+                  <SlotInputForm
+                    id={"stoponloss"}
+                    label={"Stop on Loss"}
+                    onChange={(e) => setStopOnLoss(e.target.value)}
+                    placeholder={"-"}
+                    type={"number"}
+                    value={stopOnLoss}
+                  />{" "}
+                  <SlotInputForm
+                    id={"takeprofit"}
+                    label={"Take Profit"}
+                    onChange={(e) => setTakeprofit(e.target.value)}
+                    placeholder={"-"}
+                    type={"number"}
+                    value={takeprofit}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             <PlayButton handler={handlePlay} />
           </div>
           <div className="md:flex hidden relative">

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import IncoLogo from "@/components/IncoLogo";
 
 const CoinFlip = ({ isFlipping, result, setUserChoiced }) => {
   const controls = useAnimation();
@@ -47,7 +48,7 @@ const CoinFlip = ({ isFlipping, result, setUserChoiced }) => {
             result === "Tails" ? "" : "bg-white"
           } border-2 border-black p-20 shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
         >
-           <img src="/svgs/bear.svg" />
+          <img src="/coin-flip/main.webp" />
         </motion.div>
       ) : (
         <motion.div
@@ -56,7 +57,8 @@ const CoinFlip = ({ isFlipping, result, setUserChoiced }) => {
             result === "Tails" ? "bg-white" : "bg-white"
           } border-2 border-black p-10 shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
         >
-          <img src="/svgs/crazy.svg" />
+          {/* <img src="/coin-flip/inco-logo.jpg" className="w-32 h-32 rounded-full" /> */}
+          <IncoLogo />
         </motion.div>
       )}
     </div>
