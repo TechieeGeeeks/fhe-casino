@@ -44,19 +44,19 @@ const CoinFlip = ({ isFlipping, result, setUserChoiced }) => {
         <motion.div
           animate={controls}
           className={`${
-            result === "Tails" ? "" : "bg-main"
-          } border-2 border-black shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
+            result === "Tails" ? "" : "bg-white"
+          } border-2 border-black p-20 shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
         >
-          {"Heads"}
+           <img src="/svgs/bear.svg" />
         </motion.div>
       ) : (
         <motion.div
           animate={controls}
           className={`${
-            result === "Tails" ? "bg-white" : "bg-main"
-          } border-2 border-black shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
+            result === "Tails" ? "bg-white" : "bg-white"
+          } border-2 border-black p-10 shadow-base rounded-full flex items-center justify-center h-[350px] aspect-square`}
         >
-          coin
+          <img src="/svgs/crazy.svg" />
         </motion.div>
       )}
     </div>

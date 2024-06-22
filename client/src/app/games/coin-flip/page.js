@@ -109,7 +109,7 @@ const Index = () => {
     if (takeprofit !== 0 && takeprofit !== undefined) {
       setMaxPayout(Math.round(takeprofit));
     } else if (takeprofit === 0 && takeprofit !== undefined) {
-      const calculatedPayout = Math.round(wager * bet * 1.75);
+      const calculatedPayout = Math.round(wager * bet * 1.98);
       setMaxPayout(calculatedPayout);
     }
   }, [wager, bet, takeprofit]);
@@ -131,7 +131,12 @@ const Index = () => {
   return (
     <>
       <div>
-        <CoinFlipAlert open={open} setOpen={setOpen} coins={result} />
+        <CoinFlipAlert
+          open={open}
+          setOpen={setOpen}
+          coins={result}
+          userChoice={userChoiced}
+        />
         <main className="relative flex flex-col items-center justify-center bg-white px-5 py-[150px] text-center font-bold bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px]">
           <div className="grid gap-4 grid-cols-2">
             <div className="max-w-[70%] flex flex-col gap-4">
