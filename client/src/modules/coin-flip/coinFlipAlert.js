@@ -86,9 +86,9 @@ const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
       <AlertDialogContent className="min-h-[85vh] min-w-[65vw] flex items-center justify-center">
         <AlertDialogHeader className={"w-full h-full"}>
           <AlertDialogTitle className="fixed top-8">Results</AlertDialogTitle>
-          <AlertDialogDescription className="h-[55vh] overflow-y-scroll no-scrollbar p-4 border-2 border-black shadow-strong scroll-smooth">
+          <AlertDialogDescription className="h-[55vh] overflow-y-scroll no-scrollbar p-4 border-2 border-black scroll-smooth">
             {skipAnimation ? (
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
                 {coins.map((coin, index) => (
                   <div
                     key={index}
@@ -101,7 +101,7 @@ const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
                 {visibleCoins.map((coin, index) => (
                   <motion.div
                     key={index}

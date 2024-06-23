@@ -108,6 +108,6 @@ const items = [
     title: "Plinko",
     displayIcon: <GiPoolTriangle className="text-[4rem]" />,
     hoverIcon: <GiPoolTriangle className="text-[6rem]" />,
-    href: "/games/dice",
+    href: "/games/plinko",
   },
 ];
