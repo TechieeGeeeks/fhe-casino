@@ -43,7 +43,7 @@ export const createSinks = () => {
       WIDTH / 2 + sinkWidth * (i - Math.floor(NUM_SINKS / 2)) - SPACING * 1.5;
     const y = HEIGHT - 435;
     const width = sinkWidth;
-    const height = width;
+    const height = width - 14;
     sinks.push({ x, y, width, height, multiplier: MULTIPLIERS[i + 1] });
   }
 
