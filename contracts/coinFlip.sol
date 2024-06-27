@@ -1,84 +1,148 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import "fhevm/lib/TFHE.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CoinFlip is ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
+    address public betTokenAddress;
+    uint32[] public array;
 
-    IERC20 public bettingToken;
+    error ZeroWager();
+
+    using SafeERC20 for IERC20;
+    bool public isInitialised;
+
+    modifier onlyWhenInitialised() {
+        if (isInitialised == false) {
+            revert();
+        }
+        _;
+    }
+
+    constructor(address _tokenAddress) Ownable(msg.sender) {
+        betTokenAddress = _tokenAddress;
+    }
+
+    function initialize() external onlyOwner {
+        require(
+            IERC20(betTokenAddress).transferFrom(
+                msg.sender,
+                address(this),
+                10000 * 10**18
+            ),
+            "Initial funding failed"
+        );
+        isInitialised = true;
+    }
 
     struct CoinFlipGame {
         uint256 wager;
+        uint256 stopGain;
+        uint256 stopLoss;
         uint64 blockNumber;
         uint32 numBets;
         bool isHeads;
     }
 
-    mapping(address => CoinFlipGame) public coinFlipGames;
+    mapping(address => CoinFlipGame) coinFlipGames;
 
+    /**
+     * @dev event emitted at the start of the game
+     * @param playerAddress address of the player that made the bet
+     * @param wager wagered amount
+     * @param isHeads player bet on which side the coin will land  1-> Heads, 0 ->Tails
+     * @param numBets number of bets the player intends to make
+     * @param stopGain gain value at which the betting stop if a gain is reached
+     * @param stopLoss loss value at which the betting stop if a loss is reached
+     */
     event CoinFlip_Play_Event(
         address indexed playerAddress,
         uint256 wager,
         bool isHeads,
-        uint32 numBets
+        uint32 numBets,
+        uint256 stopGain,
+        uint256 stopLoss
     );
-
+    /**
+     * @dev event emitted by the VRF callback with the bet results
+     * @param playerAddress address of the player that made the bet
+     * @param wager wager amount
+     * @param payout total payout transfered to the player
+     * @param tokenAddress address of token the wager was made and payout, 0 address is considered the native coin
+     * @param coinOutcomes results of coinFlip, 1-> Heads, 0 ->Tails
+     * @param payouts individual payouts for each bet
+     * @param numGames number of games performed
+     */
     event CoinFlip_Outcome_Event(
         address indexed playerAddress,
         uint256 wager,
         uint256 payout,
+        address tokenAddress,
         uint8[] coinOutcomes,
         uint256[] payouts,
         uint32 numGames
     );
 
+    /**
+     * @dev event emitted when a refund is done in coin flip
+     * @param player address of the player reciving the refund
+     * @param wager amount of wager that was refunded
+     * @param tokenAddress address of token the refund was made in
+     */
     event CoinFlip_Refund_Event(
         address indexed player,
-        uint256 wager
+        uint256 wager,
+        address tokenAddress
     );
 
     error WagerAboveLimit(uint256 wager, uint256 maxWager);
+    error AwaitingVRF(uint256 requestID);
     error InvalidNumBets(uint256 maxNumBets);
-
-    constructor(address _tokenAddress) Ownable(msg.sender) {
-        bettingToken = IERC20(_tokenAddress);
-    }
+    error NotAwaitingVRF();
+    error BlockNumberTooLow(uint256 have, uint256 want);
+    error OnlyCoordinatorCanFulfill(address have, address want);
 
     /**
-     * @dev Function to get the current state of a player's game
-     * @param player Address of the player to get the state for
-     * @return CoinFlipGame Current game state of the player
+     * @dev function to get current request player is await from VRF, returns 0 if none
+     * @param player address of the player to get the state
      */
-    function CoinFlip_GetState(address player) external view returns (CoinFlipGame memory) {
-        return coinFlipGames[player];
+    function CoinFlip_GetState(address player)
+        external
+        view
+        returns (CoinFlipGame memory)
+    {
+        return (coinFlipGames[player]);
     }
 
     /**
-     * @dev Function to play Coin Flip, takes the user's wager, saves bet parameters and requests random numbers
-     * @param wager Wager amount in tokens
-     * @param numBets Number of bets to make
-     * @param isHeads Player's bet on which side the coin will land (true for heads, false for tails)
+     * @dev Function to play Coin Flip, takes the user wager saves bet parameters and makes a request to the VRF
+     * @param wager wager amount
+     * @param numBets number of bets to make, and amount of random numbers to request
+     * @param stopGain treshold value at which the bets stop if a certain profit is obtained
+     * @param stopLoss treshold value at which the bets stop if a certain loss is obtained
+     * @param isHeads if bet selected heads or Tails
      */
     function CoinFlip_Play(
         uint256 wager,
         bool isHeads,
-        uint32 numBets
-    ) external nonReentrant {
+        uint32 numBets,
+        uint256 stopGain,
+        uint256 stopLoss
+    ) external nonReentrant onlyWhenInitialised {
         address msgSender = msg.sender;
-        require(numBets > 0, "Invalid number of bets");
-        require(numBets <= 10, "Exceeded maximum number of bets per transaction");
-
-        uint256 totalWager = wager * numBets;
-        require(bettingToken.balanceOf(msgSender) >= totalWager, "Insufficient balance");
-        require(bettingToken.allowance(msgSender, address(this)) >= totalWager, "Insufficient allowance");
-
-        bettingToken.safeTransferFrom(msgSender, address(this), totalWager);
+        if (!(numBets > 0 && numBets <= 100)) {
+            revert InvalidNumBets(100);
+        }
+        _transferWager(wager * numBets, msgSender);
 
         coinFlipGames[msgSender] = CoinFlipGame(
             wager,
+            stopGain,
+            stopLoss,
             uint64(block.number),
             numBets,
             isHeads
@@ -88,77 +152,131 @@ contract CoinFlip is ReentrancyGuard, Ownable {
             msgSender,
             wager,
             isHeads,
-            numBets
+            numBets,
+            stopGain,
+            stopLoss
         );
 
-        uint8[] memory randomNumbers = generateRandomNumbers(numBets);
-        settleBets(msgSender, randomNumbers);
+        getRandomNumberAndSettleBets(numBets, msgSender);
     }
 
-    /**
-     * @dev Internal function to generate random numbers using block.number and block.timestamp
-     * @param numBets Number of random numbers to generate
-     * @return Array of random numbers
-     */
-    function generateRandomNumbers(uint32 numBets) internal view returns (uint8[] memory) {
-        uint8[] memory randomNumbers = new uint8[](numBets);
-        for (uint32 i = 0; i < numBets; i++) {
-            randomNumbers[i] = uint8(uint256(keccak256(abi.encodePacked(block.timestamp, i))) % 2);
-        }
-        return randomNumbers;
-    }
-
-    /**
-     * @dev Function to settle bets based on random numbers
-     * @param player Address of the player
-     * @param randomNumbers Array of random numbers used to determine outcomes
-     */
-    function settleBets(address player, uint8[] memory randomNumbers) internal {
-        CoinFlipGame storage game = coinFlipGames[player];
-        require(game.numBets > 0, "No active game");
-
-        uint256 payout = 0;
+    function settleBet(uint32[] memory randomWords, address playerAddress)
+        internal
+    {
+        if (playerAddress == address(0)) revert();
+        CoinFlipGame storage game = coinFlipGames[playerAddress];
+        int256 totalValue;
+        uint256 payout;
+        uint32 i;
+        uint8[] memory coinFlip = new uint8[](game.numBets);
         uint256[] memory payouts = new uint256[](game.numBets);
-        uint8[] memory coinOutcomes = new uint8[](game.numBets);
 
-        for (uint32 i = 0; i < game.numBets; i++) {
-            coinOutcomes[i] = randomNumbers[i];
+        address tokenAddress = betTokenAddress;
 
-            if ((coinOutcomes[i] == 1 && game.isHeads) || (coinOutcomes[i] == 0 && !game.isHeads)) {
-                payout += game.wager * 3 / 2; // Payout 1.5 times the wager
-                payouts[i] = game.wager * 3 / 2;
+        for (i = 0; i < game.numBets; i++) {
+            if (totalValue >= int256(game.stopGain)) {
+                break;
+            }
+            if (totalValue <= -int256(game.stopLoss) && game.stopLoss != 0) {
+                break;
+            }
+
+            coinFlip[i] = uint8(randomWords[i] % 2);
+
+            if (coinFlip[i] == 1 && game.isHeads == true) {
+                totalValue += int256((game.wager * 9800) / 10000);
+                payout += (game.wager * 19800) / 10000;
+                payouts[i] = (game.wager * 19800) / 10000;
+                continue;
+            }
+            if (coinFlip[i] == 0 && game.isHeads == false) {
+                totalValue += int256((game.wager * 9800) / 10000);
+                payout += (game.wager * 19800) / 10000;
+                payouts[i] = (game.wager * 19800) / 10000;
+                continue;
+            }
+
+            totalValue -= int256(game.wager);
+        }
+
+        payout += (game.numBets - i) * game.wager;
+
+        emit CoinFlip_Outcome_Event(
+            playerAddress,
+            game.wager,
+            payout,
+            tokenAddress,
+            coinFlip,
+            payouts,
+            i
+        );
+        delete (coinFlipGames[playerAddress]);
+        if (payout != 0) {
+            _transferPayout(playerAddress, payout, tokenAddress);
+        }
+    }
+
+    function getRandomNumberAndSettleBets(uint32 numBets, address playerAddress)
+        public
+    {
+        require(numBets > 0, "Invalid number of bets");
+
+        uint32[] memory randomNumberArray = new uint32[](numBets);
+        uint32 encryptedRandomNumber = uint32(
+            generateEncryptedRandomNumber() % 6
+        );
+        for (uint256 i = 0; i < numBets; i++) {
+            if (i % 2 == 0) {
+                randomNumberArray[i] =
+                    ((encryptedRandomNumber + uint32(i)) % 3) +
+                    uint32(block.timestamp % 5);
+            } else if (i % 3 == 0) {
+                randomNumberArray[i] =
+                    ((encryptedRandomNumber + uint32(i)) % 7) +
+                    uint32(block.number % 8);
+            } else if (i == 1) {
+                randomNumberArray[i] = encryptedRandomNumber + uint32(i);
+            } else if (i % 5 == 0) {
+                randomNumberArray[i] =
+                    encryptedRandomNumber +
+                    uint32(block.number % i);
+            } else {
+                randomNumberArray[i] = encryptedRandomNumber;
             }
         }
 
-        emit CoinFlip_Outcome_Event(
-            player,
-            game.wager,
-            payout,
-            coinOutcomes,
-            payouts,
-            game.numBets
-        );
+        // Call settleBet with the generated random numbers
+        settleBet(randomNumberArray, playerAddress);
 
-        if (payout > 0) {
-            bettingToken.safeTransfer(player, payout);
+        array = randomNumberArray;
+    }
+
+    function generateEncryptedRandomNumber() internal view returns (uint32) {
+        return TFHE.decrypt(TFHE.randEuint32());
+    }
+
+    function _transferWager(uint256 wager, address msgSender) internal {
+        if (wager == 0) {
+            revert ZeroWager();
         }
+        IERC20(betTokenAddress).safeTransferFrom(
+            msgSender,
+            address(this),
+            wager
+        );
     }
 
     /**
-     * @dev Function to refund the user's tokens if they decide to cancel their bet
+     * @dev function to request bankroll to give payout to player
+     * @param player address of the player
+     * @param payout amount of payout to give
+     * @param tokenAddress address of the token in which to give the payout
      */
-    function CoinFlip_Refund() external nonReentrant {
-        address msgSender = msg.sender;
-        CoinFlipGame storage game = coinFlipGames[msgSender];
-
-        require(game.numBets > 0, "No active game");
-
-        uint256 totalWager = game.wager * game.numBets;
-        bettingToken.safeTransfer(msgSender, totalWager);
-
-        delete coinFlipGames[msgSender];
-
-        emit CoinFlip_Refund_Event(msgSender, totalWager);
+    function _transferPayout(
+        address player,
+        uint256 payout,
+        address tokenAddress
+    ) internal {
+        IERC20(tokenAddress).safeTransfer(player, payout);
     }
-
 }
