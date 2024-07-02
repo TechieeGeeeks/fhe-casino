@@ -15,6 +15,13 @@ export function Simulation() {
     6: [],
     7: [],
     8: [],
+    9: [],
+    10: [],
+    11: [],
+    12: [],
+    13: [],
+    14: [],
+    15: [],
   });
 
   async function simulate(ballManager) {
@@ -46,10 +53,11 @@ export function Simulation() {
       };
     }
   }, [canvasRef]);
+  console.log(outputs)
 
   return (
     <div className="flex flex-col mt-40 lg:flex-row items-center justify-between text-black overflow-auto">
-      <div className="flex mx-16 flex-col justify-center pt-10">
+      <div className="flex mx-16 flex-col justify-center pt-10 max-h-32">
         {JSON.stringify(outputs, null, 2)}
       </div>
       <div className="flex flex-col items-center justify-center">

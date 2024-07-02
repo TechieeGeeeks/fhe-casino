@@ -102,7 +102,7 @@ const items = [
     title: "Mines",
     displayIcon: <GiRollingBomb className="text-[4rem]" />,
     hoverIcon: <GiRollingBomb className="text-[6rem]" />,
-    href: "/games/dice",
+    href: "/games/mines",
   },
   {
     title: "Plinko",

@@ -30,7 +30,7 @@ const Page = () => {
 
   const handlePlay = () => {
     if (ballManager) {
-      ballManager.addBall(4059694.8020898583);
+      ballManager.addBall(3919792.5329278745);
     }
   };
 
