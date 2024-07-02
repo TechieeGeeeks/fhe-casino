@@ -17,11 +17,17 @@ const MULTIPLIERS = {
   7: 1.1,
   8: 1.2,
   9: 1.4,
+  10: 1.5,
+  11: 1.6,
+  12: 1.7,
+  13: 1.8,
+  14: 1.9,
+  15: 2,
 };
 
 export const createObstacles = () => {
   const obstacles = [];
-  const rows = 10;
+  const rows = 16;
   for (let row = 2; row < rows; row++) {
     const numObstacles = row + 1;
     const y = 0 + row * 35;
@@ -41,7 +47,7 @@ export const createSinks = () => {
   for (let i = 0; i < NUM_SINKS; i++) {
     const x =
       WIDTH / 2 + sinkWidth * (i - Math.floor(NUM_SINKS / 2)) - SPACING * 1.5;
-    const y = HEIGHT - 435;
+    const y = HEIGHT - 225;
     const width = sinkWidth;
     const height = width - 14;
     sinks.push({ x, y, width, height, multiplier: MULTIPLIERS[i + 1] });
