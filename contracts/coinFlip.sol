@@ -51,23 +51,6 @@ contract CoinFlip is ReentrancyGuard, Ownable {
     mapping(address => CoinFlipGame) coinFlipGames;
 
     /**
-     * @dev event emitted at the start of the game
-     * @param playerAddress address of the player that made the bet
-     * @param wager wagered amount
-     * @param isHeads player bet on which side the coin will land  1-> Heads, 0 ->Tails
-     * @param numBets number of bets the player intends to make
-     * @param stopGain gain value at which the betting stop if a gain is reached
-     * @param stopLoss loss value at which the betting stop if a loss is reached
-     */
-    event CoinFlip_Play_Event(
-        address indexed playerAddress,
-        uint256 wager,
-        bool isHeads,
-        uint32 numBets,
-        uint256 stopGain,
-        uint256 stopLoss
-    );
-    /**
      * @dev event emitted by the VRF callback with the bet results
      * @param playerAddress address of the player that made the bet
      * @param wager wager amount
@@ -86,37 +69,7 @@ contract CoinFlip is ReentrancyGuard, Ownable {
         uint256[] payouts,
         uint32 numGames
     );
-
-    /**
-     * @dev event emitted when a refund is done in coin flip
-     * @param player address of the player reciving the refund
-     * @param wager amount of wager that was refunded
-     * @param tokenAddress address of token the refund was made in
-     */
-    event CoinFlip_Refund_Event(
-        address indexed player,
-        uint256 wager,
-        address tokenAddress
-    );
-
-    error WagerAboveLimit(uint256 wager, uint256 maxWager);
-    error AwaitingVRF(uint256 requestID);
     error InvalidNumBets(uint256 maxNumBets);
-    error NotAwaitingVRF();
-    error BlockNumberTooLow(uint256 have, uint256 want);
-    error OnlyCoordinatorCanFulfill(address have, address want);
-
-    /**
-     * @dev function to get current request player is await from VRF, returns 0 if none
-     * @param player address of the player to get the state
-     */
-    function CoinFlip_GetState(address player)
-        external
-        view
-        returns (CoinFlipGame memory)
-    {
-        return (coinFlipGames[player]);
-    }
 
     /**
      * @dev Function to play Coin Flip, takes the user wager saves bet parameters and makes a request to the VRF
@@ -146,15 +99,6 @@ contract CoinFlip is ReentrancyGuard, Ownable {
             uint64(block.number),
             numBets,
             isHeads
-        );
-
-        emit CoinFlip_Play_Event(
-            msgSender,
-            wager,
-            isHeads,
-            numBets,
-            stopGain,
-            stopLoss
         );
 
         getRandomNumberAndSettleBets(numBets, msgSender);
