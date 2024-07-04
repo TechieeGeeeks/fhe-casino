@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
+import "./BankRoll.sol";
 import "fhevm/lib/TFHE.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CoinFlip is ReentrancyGuard, Ownable {
+contract CoinFlip is Ownable {
     using SafeERC20 for IERC20;
     address public betTokenAddress;
     uint32[] public array;
@@ -23,20 +23,20 @@ contract CoinFlip is ReentrancyGuard, Ownable {
         _;
     }
 
-    constructor(address _tokenAddress) Ownable(msg.sender) {
+    address public bankRoll;
+
+    constructor(address _tokenAddress, address _bankRoll) Ownable(msg.sender) {
         betTokenAddress = _tokenAddress;
+        bankRoll = _bankRoll;
     }
 
-    function initialize() external onlyOwner {
-        require(
-            IERC20(betTokenAddress).transferFrom(
-                msg.sender,
-                address(this),
-                10000 * 10**18
-            ),
-            "Initial funding failed"
-        );
-        isInitialised = true;
+    function _transferWager(uint256 wager, address player) internal {
+        require(wager >= 1, "Wager must be at least 1");
+        Bankroll(bankRoll).transferToBankRoll(player, wager);
+    }
+
+    function _transferPayout(address player, uint256 payout) internal {
+        Bankroll(bankRoll).transferFromBankRoll(player, payout);
     }
 
     struct CoinFlipGame {
@@ -79,13 +79,13 @@ contract CoinFlip is ReentrancyGuard, Ownable {
      * @param stopLoss treshold value at which the bets stop if a certain loss is obtained
      * @param isHeads if bet selected heads or Tails
      */
-    function CoinFlip_Play(
+    function COINFLIP_PLAY(
         uint256 wager,
         bool isHeads,
         uint32 numBets,
         uint256 stopGain,
         uint256 stopLoss
-    ) external nonReentrant onlyWhenInitialised {
+    ) external onlyWhenInitialised {
         address msgSender = msg.sender;
         if (!(numBets > 0 && numBets <= 100)) {
             revert InvalidNumBets(100);
@@ -156,7 +156,7 @@ contract CoinFlip is ReentrancyGuard, Ownable {
         );
         delete (coinFlipGames[playerAddress]);
         if (payout != 0) {
-            _transferPayout(playerAddress, payout, tokenAddress);
+            _transferPayout(playerAddress, payout);
         }
     }
 
@@ -199,28 +199,4 @@ contract CoinFlip is ReentrancyGuard, Ownable {
         return TFHE.decrypt(TFHE.randEuint32());
     }
 
-    function _transferWager(uint256 wager, address msgSender) internal {
-        if (wager == 0) {
-            revert ZeroWager();
-        }
-        IERC20(betTokenAddress).safeTransferFrom(
-            msgSender,
-            address(this),
-            wager
-        );
-    }
-
-    /**
-     * @dev function to request bankroll to give payout to player
-     * @param player address of the player
-     * @param payout amount of payout to give
-     * @param tokenAddress address of the token in which to give the payout
-     */
-    function _transferPayout(
-        address player,
-        uint256 payout,
-        address tokenAddress
-    ) internal {
-        IERC20(tokenAddress).safeTransfer(player, payout);
-    }
 }
