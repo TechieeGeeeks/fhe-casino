@@ -12,15 +12,7 @@ contract Dice is Ownable {
 
     error ZeroWager();
 
-    using SafeERC20 for IERC20;
     bool public isInitialised;
-
-    modifier onlyWhenInitialised() {
-        if (isInitialised == false) {
-            revert();
-        }
-        _;
-    }
 
     address public bankRoll;
 
@@ -31,11 +23,14 @@ contract Dice is Ownable {
 
     function _transferWager(uint256 wager, address player) internal {
         require(wager >= 1, "Wager must be at least 1");
-        Bankroll(bankRoll).transferToBankRoll(player, wager);
+        Bankroll(bankRoll).transferToBankRoll(player,wager);
     }
 
-    function _transferPayout(address player, uint256 payout) internal {
-        Bankroll(bankRoll).transferFromBankRoll(player, payout);
+    function _transferPayout(
+        address player,
+        uint256 payout
+    ) internal {
+        Bankroll(bankRoll).transferFromBankRoll(player,payout);
     }
 
     /**

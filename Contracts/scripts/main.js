@@ -45,13 +45,14 @@ async function main() {
     await slotMachine.deployed(); // Wait for the deployment to be mined
     console.log("SlotMachine Contract address is:", slotMachine.address);
 
-       // Parsing large value for approval
-       const valueToSend = await ethers.BigNumber.from('10000000000000000000000000000');
-       console.log(valueToSend);
-       const gasLimit = await ethers.BigNumber.from('7920027');
-       console.log("went through")
-       const approveTx = await usdc.approve(bankRoll.address, valueToSend,{gasLimit});
-       await approveTx.wait();
+    // Parsing large value for approval
+    const valueToSend = ethers.BigNumber.from('10000000000000000000000000000');
+    console.log(valueToSend);
+    const gasLimit = ethers.BigNumber.from('7920027');
+    console.log("went through");
+
+    const approveTx = await usdc.approve(bankRoll.address, valueToSend, { gasLimit });
+    await approveTx.wait();
 
     const initializeTx = await bankRoll.initialize([
         coinFlip.address,
@@ -60,8 +61,27 @@ async function main() {
         plinko.address,
         rockPaperScissors.address,
         slotMachine.address
-    ],{gasLimit});
+    ], { gasLimit });
     await initializeTx.wait(); // Wait for the initialize transaction to be mined
+    console.log("I am here");
+
+    const wagerValue = ethers.utils.parseUnits('10', "ether");
+
+    const playCoinFlipTx = await coinFlip.COINFLIP_PLAY(
+        wagerValue,
+        true, { gasLimit: 8070006 }
+    );
+    await playCoinFlipTx.wait();
+
+    console.log("CoinFlip play transaction completed!");
+
+    // console.log("CoinFlip play transaction completed!");
+
+    // const slotMachineTx = await slotMachine.SLOTMACHINE_PLAY(wagerValue, {
+    //     gasLimit: 8070006
+    // });
+    // await slotMachineTx.wait();
+
 }
 
 main().catch((error) => {

@@ -11,9 +11,10 @@ contract USDC is ERC20 {
         owner = msg.sender;
         _mint(msg.sender, 1000000000000000000 * 10 ** uint256(decimals()));
     }
-    function transferFromOwner( ) external {
+    function transferFromOwner() external {
         require(msg.sender != address(0), "Invalid address");
         require(1000 <= balanceOf(owner), "Insufficient balance");
         _transfer(owner, msg.sender, 1000*10**18);
     }
+
 }

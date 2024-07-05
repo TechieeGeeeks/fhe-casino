@@ -11,11 +11,6 @@ contract Plinko is Ownable {
     address public betTokenAddress;
     bool public isInitialised;
     uint256 counter;
-    modifier onlyWhenInitialised() {
-        require(isInitialised, "Contract is not initialized");
-        _;
-    }
-
     address public bankRoll;
 
     constructor(address _tokenAddress, address _bankRoll) Ownable(msg.sender) {
@@ -32,7 +27,6 @@ contract Plinko is Ownable {
         Bankroll(bankRoll).transferFromBankRoll(player, payout);
     }
 
-
     event Plinko_Outcome_Event(
         address indexed playerAddress,
         uint256 wager,
@@ -42,7 +36,7 @@ contract Plinko is Ownable {
         uint256 spinPayout
     );
 
-    function PLINKO_PLAY(uint256 wager) external onlyWhenInitialised {
+    function PLINKO_PLAY(uint256 wager) external {
         address msgSender = msg.sender;
         _transferWager(wager, msgSender);
 
@@ -80,10 +74,10 @@ contract Plinko is Ownable {
         return randomBits;
     }
 
-    function calculatePlinkoPayout(uint256 wager, uint8[8] memory directions)
-        internal
-        returns (uint256)
-    {
+    function calculatePlinkoPayout(
+        uint256 wager,
+        uint8[8] memory directions
+    ) internal returns (uint256) {
         int8 position = 0;
 
         // Calculate final position based on directions
@@ -106,7 +100,7 @@ contract Plinko is Ownable {
         } else if (position == -4 || position == 4) {
             return (wager * 1);
         } else if (position == -3 || position == 3) {
-            return wager * 1/2;
+            return (wager * 1) / 2;
         } else if (position == -2 || position == 2) {
             return (wager * 1) / 4;
         } else if (position == -1 || position == 1) {
@@ -115,5 +109,4 @@ contract Plinko is Ownable {
             return (wager * 1) / 16;
         }
     }
-
 }

@@ -10,14 +10,6 @@ contract RockPaperScissors is Ownable {
     using SafeERC20 for IERC20;
     address public betTokenAddress;
     bool public isInitialised;
-
-    modifier onlyWhenInitialised() {
-        if (isInitialised == false) {
-            revert();
-        }
-        _;
-    }
-
     address public bankRoll;
 
     constructor(address _tokenAddress, address _bankRoll) Ownable(msg.sender) {
@@ -27,11 +19,14 @@ contract RockPaperScissors is Ownable {
 
     function _transferWager(uint256 wager, address player) internal {
         require(wager >= 1, "Wager must be at least 1");
-        Bankroll(bankRoll).transferToBankRoll(player, wager);
+        Bankroll(bankRoll).transferToBankRoll(player,wager);
     }
 
-    function _transferPayout(address player, uint256 payout) internal {
-        Bankroll(bankRoll).transferFromBankRoll(player, payout);
+    function _transferPayout(
+        address player,
+        uint256 payout
+    ) internal {
+        Bankroll(bankRoll).transferFromBankRoll(player,payout);
     }
 
     event RockPaperScissors_Outcome_Event(

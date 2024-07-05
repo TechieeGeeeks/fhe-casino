@@ -12,25 +12,15 @@ contract SlotMachine is Ownable {
     bool public isInitialised;
     euint8 private encryptedConstantRandomNumber;
     uint256 counter;
+    address public bankRoll;
     modifier onlyWhenInitialised() {
         require(isInitialised, "Contract is not initialized");
         _;
     }
 
-    address public bankRoll;
-
     constructor(address _tokenAddress, address _bankRoll) Ownable(msg.sender) {
         betTokenAddress = _tokenAddress;
         bankRoll = _bankRoll;
-    }
-
-    function _transferWager(uint256 wager, address player) internal {
-        require(wager >= 1, "Wager must be at least 1");
-        Bankroll(bankRoll).transferToBankRoll(player, wager);
-    }
-
-    function _transferPayout(address player, uint256 payout) internal {
-        Bankroll(bankRoll).transferFromBankRoll(player, payout);
     }
 
     event SlotMachine_Outcome_Event(
@@ -43,10 +33,10 @@ contract SlotMachine is Ownable {
     );
 
     function SLOTMACHINE_PLAY(uint256 wager) external {
-        if (wager == 0) {
-            _transferWager(wager, msg.sender);
-        }
-        settleBet(wager, msg.sender);
+        address msgSender = msg.sender;
+        _transferWager(wager, msgSender);
+
+        settleBet(wager, msgSender);
     }
 
     function settleBet(uint256 wager, address playerAddress) internal {
@@ -107,7 +97,11 @@ contract SlotMachine is Ownable {
 
     function generateEncryptedRandomNumbers()
         public
-        returns (uint8, uint8, uint8)
+        returns (
+            uint8,
+            uint8,
+            uint8
+        )
     {
         uint8 randomNumber = TFHE.decrypt(TFHE.randEuint8());
         uint8 _randomNumber1 = randomNumber % 8;
@@ -119,5 +113,15 @@ contract SlotMachine is Ownable {
         return (_randomNumber1, _randomNumber2, _randomNumber3);
     }
 
-    
+    function _transferWager(uint256 wager, address player) internal {
+        require(wager >= 1, "Wager must be at least 1");
+        Bankroll(bankRoll).transferToBankRoll(player,wager);
+    }
+
+    function _transferPayout(
+        address player,
+        uint256 payout
+    ) internal {
+        Bankroll(bankRoll).transferFromBankRoll(player,payout);
+    }
 }

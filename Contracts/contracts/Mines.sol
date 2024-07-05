@@ -14,11 +14,6 @@ contract Mines is Ownable {
     uint256 public houseBalance;
     uint256 counter;
 
-    modifier onlyWhenInitialised() {
-        require(isInitialised, "Contract is not initialized");
-        _;
-    }
-
     address public bankRoll;
 
     constructor(address _tokenAddress, address _bankRoll) Ownable(msg.sender) {
@@ -28,11 +23,14 @@ contract Mines is Ownable {
 
     function _transferWager(uint256 wager, address player) internal {
         require(wager >= 1, "Wager must be at least 1");
-        Bankroll(bankRoll).transferToBankRoll(player, wager);
+        Bankroll(bankRoll).transferToBankRoll(player,wager);
     }
 
-    function _transferPayout(address player, uint256 payout) internal {
-        Bankroll(bankRoll).transferFromBankRoll(player, payout);
+    function _transferPayout(
+        address player,
+        uint256 payout
+    ) internal {
+        Bankroll(bankRoll).transferFromBankRoll(player,payout);
     }
 
 
@@ -45,7 +43,7 @@ contract Mines is Ownable {
         uint8[2][] minePositions
     );
 
-    function placeBet(uint8[2][] memory points, uint8 numMines, uint256 wager) external onlyWhenInitialised {
+    function placeBet(uint8[2][] memory points, uint8 numMines, uint256 wager) external {
         require(wager > 0, "Wager must be greater than zero");
         require(numMines > 0 && numMines <= 5, "Invalid number of mines");
         
