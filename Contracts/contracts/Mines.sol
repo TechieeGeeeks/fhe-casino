@@ -6,7 +6,7 @@ import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "fhevm/lib/TFHE.sol";
 
-contract MinesGame is Ownable {
+contract Mines is Ownable {
     using SafeERC20 for IERC20;
 
     address public betTokenAddress;
