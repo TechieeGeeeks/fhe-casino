@@ -60,7 +60,7 @@ contract Mines is Ownable {
         uint8[2][] minePositions
     );
 
-    function placeBet(uint8[2][] memory points, uint8 numMines, uint256 wager) external {
+    function MINES_PLAY(uint8[2][] memory points, uint8 numMines, uint256 wager) external {
         require(wager > 0, "Wager must be greater than zero");
         require(numMines > 0 && numMines <= 5, "Invalid number of mines");
         

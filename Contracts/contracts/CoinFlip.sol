@@ -125,7 +125,7 @@ contract CoinFlip is Ownable {
      * @param stopLoss treshold value at which the bets stop if a certain loss is obtained
      * @param isHeads if bet selected heads or Tails
      */
-    function CoinFlip_Play(
+    function COINFLIP_PLAY(
         uint256 wager,
         bool isHeads,
         uint32 numBets,
