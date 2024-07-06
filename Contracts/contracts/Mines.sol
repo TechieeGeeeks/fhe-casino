@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import "./BankRoll.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "fhevm/lib/TFHE.sol";
@@ -14,25 +13,43 @@ contract Mines is Ownable {
     uint256 public houseBalance;
     uint256 counter;
 
-    address public bankRoll;
+    error ZeroWager();
 
-    constructor(address _tokenAddress, address _bankRoll) Ownable(msg.sender) {
+    constructor(address _tokenAddress) Ownable(msg.sender) {
         betTokenAddress = _tokenAddress;
-        bankRoll = _bankRoll;
     }
 
-    function _transferWager(uint256 wager, address player) internal {
-        require(wager >= 1, "Wager must be at least 1");
-        Bankroll(bankRoll).transferToBankRoll(player,wager);
+    function initialize() external onlyOwner {
+        require(
+            IERC20(betTokenAddress).transferFrom(
+                msg.sender,
+                address(this),
+                10000 * 10 ** 18
+            ),
+            "Initial funding failed"
+        );
+        isInitialised = true;
     }
 
-    function _transferPayout(
-        address player,
-        uint256 payout
-    ) internal {
-        Bankroll(bankRoll).transferFromBankRoll(player,payout);
+    function _transferWager(uint256 wager, address msgSender) internal {
+        if (wager == 0) {
+            revert ZeroWager();
+        }
+        IERC20(betTokenAddress).safeTransferFrom(
+            msgSender,
+            address(this),
+            wager
+        );
     }
 
+    /**
+     * @dev function to request bankroll to give payout to player
+     * @param player address of the player
+     * @param payout amount of payout to give
+     */
+    function _transferPayout(address player, uint256 payout) internal {
+        IERC20(betTokenAddress).safeTransfer(player, payout);
+    }
 
     event MinesGameOutcome(
         address indexed playerAddress,
