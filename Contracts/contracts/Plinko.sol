@@ -1,37 +1,53 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import "./BankRoll.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "fhevm/lib/TFHE.sol";
 
-contract PlinkoMachine is Ownable {
+contract Plinko is Ownable {
     using SafeERC20 for IERC20;
     address public betTokenAddress;
     bool public isInitialised;
     uint256 counter;
-    modifier onlyWhenInitialised() {
-        require(isInitialised, "Contract is not initialized");
-        _;
-    }
 
-    address public bankRoll;
+    error ZeroWager();
 
-    constructor(address _tokenAddress, address _bankRoll) Ownable(msg.sender) {
+    constructor(address _tokenAddress) Ownable(msg.sender) {
         betTokenAddress = _tokenAddress;
-        bankRoll = _bankRoll;
     }
 
-    function _transferWager(uint256 wager, address player) internal {
-        require(wager >= 1, "Wager must be at least 1");
-        Bankroll(bankRoll).transferToBankRoll(player, wager);
+    function initialize() external onlyOwner {
+        require(
+            IERC20(betTokenAddress).transferFrom(
+                msg.sender,
+                address(this),
+                10000 * 10 ** 18
+            ),
+            "Initial funding failed"
+        );
+        isInitialised = true;
     }
 
+    function _transferWager(uint256 wager, address msgSender) internal {
+        if (wager == 0) {
+            revert ZeroWager();
+        }
+        IERC20(betTokenAddress).safeTransferFrom(
+            msgSender,
+            address(this),
+            wager
+        );
+    }
+
+    /**
+     * @dev function to request bankroll to give payout to player
+     * @param player address of the player
+     * @param payout amount of payout to give
+     */
     function _transferPayout(address player, uint256 payout) internal {
-        Bankroll(bankRoll).transferFromBankRoll(player, payout);
+        IERC20(betTokenAddress).safeTransfer(player, payout);
     }
-
 
     event Plinko_Outcome_Event(
         address indexed playerAddress,
@@ -42,7 +58,7 @@ contract PlinkoMachine is Ownable {
         uint256 spinPayout
     );
 
-    function PLINKO_PLAY(uint256 wager) external onlyWhenInitialised {
+    function PLINKO_PLAY(uint256 wager) external {
         address msgSender = msg.sender;
         _transferWager(wager, msgSender);
 
@@ -80,10 +96,10 @@ contract PlinkoMachine is Ownable {
         return randomBits;
     }
 
-    function calculatePlinkoPayout(uint256 wager, uint8[8] memory directions)
-        internal
-        returns (uint256)
-    {
+    function calculatePlinkoPayout(
+        uint256 wager,
+        uint8[8] memory directions
+    ) internal returns (uint256) {
         int8 position = 0;
 
         // Calculate final position based on directions
@@ -106,7 +122,7 @@ contract PlinkoMachine is Ownable {
         } else if (position == -4 || position == 4) {
             return (wager * 1);
         } else if (position == -3 || position == 3) {
-            return wager * 1/2;
+            return (wager * 1) / 2;
         } else if (position == -2 || position == 2) {
             return (wager * 1) / 4;
         } else if (position == -1 || position == 1) {
@@ -115,5 +131,4 @@ contract PlinkoMachine is Ownable {
             return (wager * 1) / 16;
         }
     }
-
 }

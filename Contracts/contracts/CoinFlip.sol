@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import "./BankRoll.sol";
 import "fhevm/lib/TFHE.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -23,20 +22,20 @@ contract CoinFlip is Ownable {
         _;
     }
 
-    address public bankRoll;
-
-    constructor(address _tokenAddress, address _bankRoll) Ownable(msg.sender) {
+    constructor(address _tokenAddress) Ownable(msg.sender) {
         betTokenAddress = _tokenAddress;
-        bankRoll = _bankRoll;
     }
 
-    function _transferWager(uint256 wager, address player) internal {
-        require(wager >= 1, "Wager must be at least 1");
-        Bankroll(bankRoll).transferToBankRoll(player, wager);
-    }
-
-    function _transferPayout(address player, uint256 payout) internal {
-        Bankroll(bankRoll).transferFromBankRoll(player, payout);
+    function initialize() external onlyOwner {
+        require(
+            IERC20(betTokenAddress).transferFrom(
+                msg.sender,
+                address(this),
+                10000 * 10**18
+            ),
+            "Initial funding failed"
+        );
+        isInitialised = true;
     }
 
     struct CoinFlipGame {
@@ -50,6 +49,23 @@ contract CoinFlip is Ownable {
 
     mapping(address => CoinFlipGame) coinFlipGames;
 
+    /**
+     * @dev event emitted at the start of the game
+     * @param playerAddress address of the player that made the bet
+     * @param wager wagered amount
+     * @param isHeads player bet on which side the coin will land  1-> Heads, 0 ->Tails
+     * @param numBets number of bets the player intends to make
+     * @param stopGain gain value at which the betting stop if a gain is reached
+     * @param stopLoss loss value at which the betting stop if a loss is reached
+     */
+    event CoinFlip_Play_Event(
+        address indexed playerAddress,
+        uint256 wager,
+        bool isHeads,
+        uint32 numBets,
+        uint256 stopGain,
+        uint256 stopLoss
+    );
     /**
      * @dev event emitted by the VRF callback with the bet results
      * @param playerAddress address of the player that made the bet
@@ -69,7 +85,37 @@ contract CoinFlip is Ownable {
         uint256[] payouts,
         uint32 numGames
     );
+
+    /**
+     * @dev event emitted when a refund is done in coin flip
+     * @param player address of the player reciving the refund
+     * @param wager amount of wager that was refunded
+     * @param tokenAddress address of token the refund was made in
+     */
+    event CoinFlip_Refund_Event(
+        address indexed player,
+        uint256 wager,
+        address tokenAddress
+    );
+
+    error WagerAboveLimit(uint256 wager, uint256 maxWager);
+    error AwaitingVRF(uint256 requestID);
     error InvalidNumBets(uint256 maxNumBets);
+    error NotAwaitingVRF();
+    error BlockNumberTooLow(uint256 have, uint256 want);
+    error OnlyCoordinatorCanFulfill(address have, address want);
+
+    /**
+     * @dev function to get current request player is await from VRF, returns 0 if none
+     * @param player address of the player to get the state
+     */
+    function CoinFlip_GetState(address player)
+        external
+        view
+        returns (CoinFlipGame memory)
+    {
+        return (coinFlipGames[player]);
+    }
 
     /**
      * @dev Function to play Coin Flip, takes the user wager saves bet parameters and makes a request to the VRF
@@ -99,6 +145,15 @@ contract CoinFlip is Ownable {
             uint64(block.number),
             numBets,
             isHeads
+        );
+
+        emit CoinFlip_Play_Event(
+            msgSender,
+            wager,
+            isHeads,
+            numBets,
+            stopGain,
+            stopLoss
         );
 
         getRandomNumberAndSettleBets(numBets, msgSender);
@@ -156,7 +211,7 @@ contract CoinFlip is Ownable {
         );
         delete (coinFlipGames[playerAddress]);
         if (payout != 0) {
-            _transferPayout(playerAddress, payout);
+            _transferPayout(playerAddress, payout, tokenAddress);
         }
     }
 
@@ -199,4 +254,28 @@ contract CoinFlip is Ownable {
         return TFHE.decrypt(TFHE.randEuint32());
     }
 
+    function _transferWager(uint256 wager, address msgSender) internal {
+        if (wager == 0) {
+            revert ZeroWager();
+        }
+        IERC20(betTokenAddress).safeTransferFrom(
+            msgSender,
+            address(this),
+            wager
+        );
+    }
+
+    /**
+     * @dev function to request bankroll to give payout to player
+     * @param player address of the player
+     * @param payout amount of payout to give
+     * @param tokenAddress address of the token in which to give the payout
+     */
+    function _transferPayout(
+        address player,
+        uint256 payout,
+        address tokenAddress
+    ) internal {
+        IERC20(tokenAddress).safeTransfer(player, payout);
+    }
 }

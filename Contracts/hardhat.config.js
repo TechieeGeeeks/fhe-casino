@@ -73,7 +73,7 @@ module.exports = {
             gas:999999
         }
     },
-    defaultNetwork: "localhost",
+    defaultNetwork: "inco",
     gasReporter: {
         enabled: REPORT_GAS,
         currency: "USD",
