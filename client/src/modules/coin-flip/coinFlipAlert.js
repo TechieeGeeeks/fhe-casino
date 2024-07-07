@@ -15,8 +15,9 @@ import confetti from "canvas-confetti";
 const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
   const [visibleCoins, setVisibleCoins] = useState([]);
   const controls = useAnimation();
+  console.log(userChoice)
   const [skipAnimation, setSkipAnimation] = useState(false);
-  const compareVal = userChoice === "Heads" ? 1 : 0;
+  const compareVal = userChoice === "heads" ? 1 : 0;
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -63,6 +64,7 @@ const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
       coins.forEach((coin, index) => {
         timeouts.push(
           setTimeout(() => {
+            console.log(compareVal, coin);
             if (coin === compareVal) winning();
             setVisibleCoins((prev) => [...prev, coin]);
           }, index * 2000)
