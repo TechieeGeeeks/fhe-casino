@@ -13,9 +13,12 @@ import {
 } from "@/components/ui/accordion";
 import PlayButton from "@/components/PlayButton";
 import { PlinkoGame } from "@/modules/plinko/PlinkoGame";
+import { playPlinkoGame } from "@/utils/helpers/plinkoHelpers";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useDispatch } from "react-redux";
+import { setToken } from "@/redux/slices/tokenSlice";
 const Page = () => {
   const [isFlipping, setIsFlipping] = useState(false);
-  const [result, setResult] = useState(["Coin"]);
   const [isBtnDisbled, setIsBtnDisbled] = useState(false);
   const [wager, setWager] = useState(0);
   const [bet, setBet] = useState(1);
@@ -27,11 +30,17 @@ const Page = () => {
   const [open, setOpen] = useState(false);
   const [ballManager, setBallManager] = useState();
   const canvasRef = useRef();
+  const { wallets } = useWallets();
+  const dispath = useDispatch();
+  const { ready } = usePrivy();
+  const w0 = wallets[0];
+  const [result, setResult] = useState();
 
   const handlePlay = () => {
-    if (ballManager) {
-      ballManager.addBall(3919792.5329278745);
-    }
+    playPlinkoGame(w0, wager, setToken, ready, dispath, setResult);
+    // if (ballManager) {
+    //   ballManager.addBall(3919792.5329278745);
+    // }
   };
 
   useEffect(() => {
@@ -53,7 +62,7 @@ const Page = () => {
               type={"number"}
               value={wager}
             />
-            <GameInputForm
+            {/* <GameInputForm
               id={"bets"}
               label={"Bets"}
               onChange={(e) => setBet(e.target.value)}
@@ -109,7 +118,7 @@ const Page = () => {
                   />
                 </AccordionContent>
               </AccordionItem>
-            </Accordion>
+            </Accordion> */}
             <PlayButton handler={handlePlay} />
           </div>
           <div className="md:flex  relative">

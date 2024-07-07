@@ -8,7 +8,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Slider } from "@/components/ui/slider";
-import React, { useState } from "react";
+import { inputChecks } from "@/lib/utils";
+import { setToken } from "@/redux/slices/tokenSlice";
+import { playDiceGame } from "@/utils/helpers/diceHelpers";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 const Page = () => {
   const [wager, setWager] = useState(0);
@@ -17,6 +22,57 @@ const Page = () => {
   const [maxPayout, setMaxPayout] = useState(0);
   const [stopOnLoss, setStopOnLoss] = useState(0);
   const [takeprofit, setTakeprofit] = useState(0);
+  const [value, setValue] = useState([80]);
+  const { login, authenticated, logout, ready } = usePrivy();
+  const { wallets } = useWallets();
+  const w0 = wallets[0];
+  const { token } = useSelector((tok) => tok.tokens);
+  const dispath = useDispatch();
+  const [result, setResult] = useState([]);
+
+  const [randomNumber, setRandomNumber] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [open, setOpen] = useState(false);
+  const play = () => {
+    const ifValidInputs = inputChecks("all", wager, bet, value);
+    // console.log(ifValidInputs);
+    if (!ifValidInputs) return;
+    playDiceGame(w0, wager, value);
+    setIsGenerating(true);
+    setTimeout(() => {
+      handleStop();
+    }, 5000);
+  };
+
+  useEffect(() => {
+    let interval;
+    if (isGenerating) {
+      interval = setInterval(() => {
+        setRandomNumber(Math.floor(Math.random() * 101));
+      }, 100); // Change the number every 100ms
+    }
+    return () => clearInterval(interval); // Cleanup interval on component unmount or when isGenerating changes
+  }, [isGenerating]);
+
+  // const handleStart = () => setIsGenerating(true);
+  const handleStop = () => {
+    setIsGenerating(false);
+    setRandomNumber(50);
+  };
+
+  useEffect(() => {
+    // Calculate total wager and round to nearest integer
+    setTotalwager(Math.round(wager * bet));
+  }, [wager, bet]);
+
+  useEffect(() => {
+    if (takeprofit !== 0 && takeprofit !== undefined) {
+      setMaxPayout(Math.round(takeprofit));
+    } else if (takeprofit === 0 && takeprofit !== undefined) {
+      const calculatedPayout = Math.round(wager * bet * 1.98);
+      setMaxPayout(calculatedPayout);
+    }
+  }, [wager, bet, takeprofit]);
   return (
     <main className="relative flex flex-col items-center justify-center bg-white px-5 py-[150px] text-center font-bold bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px]">
       <div className="grid gap-4 grid-cols-2">
@@ -56,7 +112,13 @@ const Page = () => {
               className={"cursor-not-allowed"}
             />
           </div>
-          <Slider defaultValue={[33]} max={100} step={1} />
+          <Slider
+            defaultValue={value}
+            value={value}
+            max={100}
+            step={1}
+            onValueChange={(e) => setValue(e)}
+          />
 
           {/* <div>
             <RadioGroup
@@ -104,16 +166,29 @@ const Page = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          <PlayButton />
+          <PlayButton handler={play} tokens={token} />
         </div>
         <div className="md:flex hidden relative">
-          <div className="w-[550px] h-full bg-black">
-            {/* <CoinFlip
-              isFlipping={isFlipping}
-              result={result}
-              setUserChoiced={setUserChoiced}
-            /> */}
+          <div className="w-[550px] h-full flex items-center justify-center">
+            <div className="h-[200px] absolute w-[200px] rounded-3xl border-4 border-black bg-main flex items-center justify-center text-3xl">
+              {randomNumber}
+            </div>
           </div>
+
+          {/* <div className="flex space-x-4">
+            <button
+              onClick={handleStart}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
+            >
+              Start
+            </button>
+            <button
+              onClick={handleStop}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
+            >
+              Stop
+            </button>
+          </div> */}
         </div>
       </div>
     </main>

@@ -16,6 +16,10 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import GameInputForm from "@/components/GameInputForm";
 import PlayButton from "@/components/PlayButton";
+import { playHandRock } from "@/utils/helpers/handrockHelpers";
+import { useDispatch } from "react-redux";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { setToken } from "@/redux/slices/tokenSlice";
 
 const Page = () => {
   const [wager, setWager] = useState(0);
@@ -30,7 +34,10 @@ const Page = () => {
   const [userChoice, setUserChoice] = useState(0);
   const [gameOutcome, setGameOutcome] = useState(null);
   const [result, setResult] = useState(1);
-
+  const { wallets } = useWallets();
+  const dispath = useDispatch();
+  const { ready } = usePrivy();
+  const w0 = wallets[0];
   const images = [
     "/rock-hand/rock.svg",
     "/rock-hand/paper.svg",
@@ -51,7 +58,18 @@ const Page = () => {
       });
       return;
     }
-    setIsPlaying(true);
+    playHandRock(
+      w0,
+      wager,
+      bet,
+      userChoice,
+      takeprofit ? takeprofit : maxPayout.toString(),
+      stopOnLoss,
+      setToken,
+      ready,
+      dispath,
+      setIsPlaying
+    );
   };
 
   const stopPlaying = () => {
@@ -81,14 +99,28 @@ const Page = () => {
   };
 
   useEffect(() => {
-    if (isPlaying) {
-      const timeout = setTimeout(() => {
-        stopPlaying();
-      }, 2000);
+    // Calculate total wager and round to nearest integer
+    setTotalwager(Math.round(wager * bet));
+  }, [wager, bet]);
 
-      return () => clearTimeout(timeout);
+  useEffect(() => {
+    if (takeprofit !== 0 && takeprofit !== undefined) {
+      setMaxPayout(Math.round(takeprofit));
+    } else if (takeprofit === 0 && takeprofit !== undefined) {
+      const calculatedPayout = Math.round(wager * bet * 1.98);
+      setMaxPayout(calculatedPayout);
     }
-  }, [isPlaying]);
+  }, [wager, bet, takeprofit]);
+
+  // useEffect(() => {
+  //   if (isPlaying) {
+  //     const timeout = setTimeout(() => {
+  //       stopPlaying();
+  //     }, 2000);
+
+  //     return () => clearTimeout(timeout);
+  //   }
+  // }, [isPlaying]);
 
   useEffect(() => {
     if (gameOutcome === "win") {
