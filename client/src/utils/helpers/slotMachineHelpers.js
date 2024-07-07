@@ -9,7 +9,8 @@ export const spinSlotMachine = async (
   setToken,
   ready,
   dispath,
-  setIsRunning
+  setIsRunning,
+  setNumbers
 ) => {
   console.log("wager:", wager);
   setIsRunning(true);
@@ -27,7 +28,7 @@ export const spinSlotMachine = async (
     });
 
     contract.on(
-      "MinesGameOutcome",
+      "SlotMachine_Outcome_Event",
       (
         playerAddress,
         wager,
@@ -36,7 +37,7 @@ export const spinSlotMachine = async (
         selectedPoints,
         minePositions
       ) => {
-        console.log("MinesGameOutcome event detected:", {
+        console.log("SlotMachine_Outcome_Event event detected:", {
           playerAddress,
           wager,
           payout,
@@ -44,9 +45,13 @@ export const spinSlotMachine = async (
           selectedPoints,
           minePositions,
         });
+
+        setNumbers(selectedPoints);
+        setIsRunning(false);
       }
     );
   } catch (error) {
+    setIsRunning(false);
     console.log(error);
     toast({ title: "Error Occured!" });
   }

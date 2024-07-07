@@ -19,7 +19,7 @@ import { setToken } from "@/redux/slices/tokenSlice";
 const Index = () => {
   const { ready } = usePrivy();
   const [isRunning, setIsRunning] = useState(false);
-  const [numbers, setNumbers] = useState([0, 1, 2]);
+  const [numbers, setNumbers] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
   const [wager, setWager] = useState();
   const [bet, setBet] = useState(1);
   const [totalwager, setTotalwager] = useState();
@@ -44,7 +44,6 @@ const Index = () => {
   const handlePlay = () => {
     if (!wager) {
       toast({
-        // variant: "destructive",
         title: "Please, add valid wager",
       });
       return;
@@ -70,11 +69,6 @@ const Index = () => {
   //     return () => clearTimeout(timeoutId);
   //   }
   // }, [isRunning]);
-
-  const generateRandomNumber = useCallback(
-    () => Math.floor(Math.random() * 3),
-    []
-  );
 
   return (
     <div>
