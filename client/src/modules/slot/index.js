@@ -11,8 +11,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import PlayButton from "@/components/PlayButton";
+import { spinSlotMachine } from "@/utils/helpers/slotMachineHelpers";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useDispatch } from "react-redux";
+import { setToken } from "@/redux/slices/tokenSlice";
 
 const Index = () => {
+  const { ready } = usePrivy();
   const [isRunning, setIsRunning] = useState(false);
   const [numbers, setNumbers] = useState([0, 1, 2]);
   const [wager, setWager] = useState();
@@ -22,6 +27,9 @@ const Index = () => {
   const [jackpot, setJackpot] = useState(false);
   const [stopOnLoss, setStopOnLoss] = useState();
   const [takeprofit, setTakeprofit] = useState();
+  const { wallets } = useWallets();
+  const w0 = wallets[0];
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (numbers[0] === numbers[1] && numbers[1] === numbers[2]) {
@@ -41,19 +49,27 @@ const Index = () => {
       });
       return;
     }
-    setIsRunning(true);
+    spinSlotMachine(
+      w0,
+      wager,
+      setToken,
+      ready,
+      dispatch,
+      setIsRunning,
+      setNumbers
+    );
   };
 
-  useEffect(() => {
-    if (isRunning) {
-      const timeoutId = setTimeout(() => {
-        setNumbers([2, 2, 2]);
-        setIsRunning(false);
-      }, 2000);
+  // useEffect(() => {
+  //   if (isRunning) {
+  //     const timeoutId = setTimeout(() => {
+  //       setNumbers([2, 2, 2]);
+  //       setIsRunning(false);
+  //     }, 2000);
 
-      return () => clearTimeout(timeoutId);
-    }
-  }, [isRunning]);
+  //     return () => clearTimeout(timeoutId);
+  //   }
+  // }, [isRunning]);
 
   const generateRandomNumber = useCallback(
     () => Math.floor(Math.random() * 3),
@@ -73,7 +89,7 @@ const Index = () => {
               type={"number"}
               value={wager}
             />
-            <SlotInputForm
+            {/* <SlotInputForm
               id={"bets"}
               label={"Bets"}
               onChange={(e) => setBet(e.target.value)}
@@ -127,7 +143,7 @@ const Index = () => {
                   />
                 </AccordionContent>
               </AccordionItem>
-            </Accordion>
+            </Accordion> */}
             <PlayButton handler={handlePlay} />
           </div>
           <div className="md:flex hidden relative">

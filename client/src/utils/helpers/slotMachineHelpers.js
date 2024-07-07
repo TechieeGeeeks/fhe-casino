@@ -6,97 +6,43 @@ import { fetchTokens } from "./webHelpers";
 export const spinSlotMachine = async (
   w0,
   wager,
-  bets,
-  userChoiced,
-  stopGain,
-  stopLoss,
   setToken,
   ready,
   dispath,
-  stopPlaying,
-  setResult,
-  setOpen
+  setIsRunning,
+  setNumbers
 ) => {
-  console.log("w0:", w0);
   console.log("wager:", wager);
-  console.log("bets:", bets);
-  console.log("userChoiced:", userChoiced);
-  console.log("stopGain:", stopGain);
-  console.log("stopLoss:", stopLoss);
+  setIsRunning(true);
 
   const provider = await w0?.getEthersProvider();
   const signer = await provider?.getSigner();
 
   const contractWager = ethers.utils.parseUnits(wager, "ether");
-  let contractStopGain = "0";
-  let contractStopLoss = "0";
-  if (stopGain) contractStopGain = ethers.utils.parseUnits(stopGain, "ether");
-  if (stopLoss) contractStopLoss = ethers.utils.parseUnits(stopLoss, "ether");
-  const contractUserChoice = userChoiced === "heads" ? true : false;
 
   console.log("contractWager:", contractWager.toString());
-  console.log("contractStopGain:", contractStopGain.toString());
-  console.log("contractStopLoss:", contractStopLoss.toString());
-  console.log("contractUserChoice:", contractUserChoice);
-
   const contract = new Contract(slotMachineAddress, slotMachineABI, signer);
   try {
-    const txReceipt = await contract.CoinFlip_Play(
-      contractWager,
-      contractUserChoice,
-      bets,
-      contractStopGain,
-      contractStopLoss,
-      {
-        gasLimit: ethers.BigNumber.from("3000000"),
-      }
-    );
-    // const bigNumber = ethers.BigNumber.from(balance);
+    const txReceipt = await contract.SLOTMACHINE_PLAY(contractWager, {
+      gasLimit: ethers.BigNumber.from("3000000"),
+    });
 
     contract.on(
-      "CoinFlip_Play_Event",
-      (player, wager, isHeads, numBets, stopGain, stopLoss, event) => {
-        console.log("CoinFlip_Play_Event:", {
-          player,
-          wager: wager.toString(),
-          isHeads,
-          numBets: numBets.toString(),
-          stopGain: stopGain.toString(),
-          stopLoss: stopLoss.toString(),
-        });
-      }
-    );
-
-    // Event listener for CoinFlip_Outcome_Event
-    contract.on(
-      "CoinFlip_Outcome_Event",
-      (
-        player,
-        wager,
-        payout,
-        tokenAddress,
-        coinResults,
-        individualPayouts,
-        numGames,
-        event
-      ) => {
-        console.log("CoinFlip_Outcome_Event:", {
-          player,
-          wager: wager.toString(),
-          payout: payout.toString(),
-          tokenAddress,
-          coinResults,
-          individualPayouts,
-          numGames: numGames.toString(),
-        });
-        // setResult(() => coinResults);
-        setOpen(true);
-        fetchTokens(w0, setToken, ready, dispath);
-        stopFlipping(coinResults);
+      "SlotMachine_Outcome_Event",
+      (playerAddress, wager, payout, tokenAddress, spin, spinPayout) => {
+        console.log("SlotMachine_Outcome_Event triggered");
+        console.log("Player Address:", playerAddress);
+        console.log("Wager:", wager.toString());
+        console.log("Payout:", payout.toString());
+        console.log("Token Address:", tokenAddress);
+        console.log("Spin:", spin);
+        console.log("Spin Payout:", spinPayout.toString());
+        setNumbers(spin);
+        setIsRunning(false);
       }
     );
   } catch (error) {
-    stopFlipping("Coin");
+    setIsRunning(false);
     console.log(error);
     toast({ title: "Error Occured!" });
   }
