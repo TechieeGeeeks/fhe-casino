@@ -1,10 +1,9 @@
 import { toast } from "@/components/ui/use-toast";
 import { Contract, ethers } from "ethers";
-import { coinFlipAddress, conflipABI } from "../contract";
+import { slotMachineAddress, slotMachineABI } from "../contract";
 import { fetchTokens } from "./webHelpers";
-import { ready } from "localforage";
 
-export const playFlipGame = async (
+export const spinSlotMachine = async (
   w0,
   wager,
   bets,
@@ -14,7 +13,7 @@ export const playFlipGame = async (
   setToken,
   ready,
   dispath,
-  stopFlipping,
+  stopPlaying,
   setResult,
   setOpen
 ) => {
@@ -40,19 +39,35 @@ export const playFlipGame = async (
   console.log("contractStopLoss:", contractStopLoss.toString());
   console.log("contractUserChoice:", contractUserChoice);
 
-  const contract = new Contract(coinFlipAddress, conflipABI, signer);
+  const contract = new Contract(slotMachineAddress, slotMachineABI, signer);
   try {
-    const txReceipt = await contract.COINFLIP_PLAY(
+    const txReceipt = await contract.CoinFlip_Play(
       contractWager,
       contractUserChoice,
       bets,
       contractStopGain,
       contractStopLoss,
       {
-        gasLimit: ethers.BigNumber.from("7920027"), 
+        gasLimit: ethers.BigNumber.from("3000000"),
+      }
+    );
+    // const bigNumber = ethers.BigNumber.from(balance);
+
+    contract.on(
+      "CoinFlip_Play_Event",
+      (player, wager, isHeads, numBets, stopGain, stopLoss, event) => {
+        console.log("CoinFlip_Play_Event:", {
+          player,
+          wager: wager.toString(),
+          isHeads,
+          numBets: numBets.toString(),
+          stopGain: stopGain.toString(),
+          stopLoss: stopLoss.toString(),
+        });
       }
     );
 
+    // Event listener for CoinFlip_Outcome_Event
     contract.on(
       "CoinFlip_Outcome_Event",
       (
@@ -63,6 +78,7 @@ export const playFlipGame = async (
         coinResults,
         individualPayouts,
         numGames,
+        event
       ) => {
         console.log("CoinFlip_Outcome_Event:", {
           player,

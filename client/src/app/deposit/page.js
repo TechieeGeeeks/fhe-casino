@@ -1,7 +1,11 @@
 "use client";
 import { MultiStepLoader } from "@/components/MultiStageLoader";
 import { setToken } from "@/redux/slices/tokenSlice";
-import { approveTokens, fetchTokens, mintToken } from "@/utils/helpers/bridgeHelpers";
+import {
+  approveTokens,
+  fetchTokens,
+  mintToken,
+} from "@/utils/helpers/bridgeHelpers";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -77,23 +81,21 @@ const Page = () => {
             Craft Your Winning Strategy Today.
           </h2>
 
-          <div className="w-full static">
-            <ul className="list-disc text-xl mt-10 grid grid-cols-2 bg-white/30 shadow-strong p-12 rounded-lg gap-4 w-full backdrop-blur-xs border-[3px] border-black">
-              <li>
-                <span className="font-bold">Step 1:</span> Minting
-                <div
-                  className="my-4 flex justify-between font-base items-center rounded-base border-2 border-black bg-white px-10 py-3 text-[22px] shadow-base transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none m800:px-8 m800:py-2.5 m800:text-lg m400:px-6 m400:py-2 m400:text-base"
-                  onClick={handleMinting}
-                >
-                  Mint
-                  <img
-                    className="ml-[15px] w-[18px] m400:ml-4 m400:w-[15px]"
-                    src={"svgs/arrow.svg"}
-                    alt="arrow"
-                  />
-                </div>
-              </li>
-              <li>
+          <div className="w-full static flex items-center justify-center">
+            <div className="list-disc text-xl mt-10 max-w-xl bg-white/30 shadow-strong p-12 rounded-lg gap-4 w-full backdrop-blur-xs border-[3px] border-black">
+              <div
+                className="my-4 flex justify-between font-base items-center rounded-base border-2 border-black bg-white px-10 py-3 text-[22px] shadow-base transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none m800:px-8 m800:py-2.5 m800:text-lg m400:px-6 m400:py-2 m400:text-base"
+                onClick={handleMinting}
+              >
+                Mint & Approve
+                <img
+                  className="ml-[15px] w-[18px] m400:ml-4 m400:w-[15px]"
+                  src={"svgs/arrow.svg"}
+                  alt="arrow"
+                />
+              </div>
+
+              {/* <li>
                 <span className="font-bold">Step 2:</span> Approving
                 <div
                   className="my-4 flex justify-between font-base items-center rounded-base border-2 border-black bg-white px-10 py-3 text-[22px] shadow-base transition-all hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none m800:px-8 m800:py-2.5 m800:text-lg m400:px-6 m400:py-2 m400:text-base"
@@ -115,8 +117,8 @@ const Page = () => {
                     alt="arrow"
                   />
                 </div>
-              </li>
-            </ul>
+              </li> */}
+            </div>
           </div>
         </div>
 
