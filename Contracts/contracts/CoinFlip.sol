@@ -2,11 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "fhevm/lib/TFHE.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CoinFlip is ReentrancyGuard, Ownable {
+contract CoinFlip is Ownable {
     using SafeERC20 for IERC20;
     address public betTokenAddress;
     uint32[] public array;
@@ -126,13 +125,13 @@ contract CoinFlip is ReentrancyGuard, Ownable {
      * @param stopLoss treshold value at which the bets stop if a certain loss is obtained
      * @param isHeads if bet selected heads or Tails
      */
-    function CoinFlip_Play(
+    function COINFLIP_PLAY(
         uint256 wager,
         bool isHeads,
         uint32 numBets,
         uint256 stopGain,
         uint256 stopLoss
-    ) external nonReentrant onlyWhenInitialised {
+    ) external onlyWhenInitialised {
         address msgSender = msg.sender;
         if (!(numBets > 0 && numBets <= 100)) {
             revert InvalidNumBets(100);
