@@ -8,14 +8,17 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+// import { Slider } from "@/components/ui/slider";
 import { inputChecks } from "@/lib/utils";
 import { setToken } from "@/redux/slices/tokenSlice";
 import { playDiceGame } from "@/utils/helpers/diceHelpers";
 import { playMineGame } from "@/utils/helpers/minesHelpers";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import React, { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Slider } from "@/components/ui/slider";
 import { useDispatch, useSelector } from "react-redux";
+import { Label } from "@/components/ui/label";
 
 const Page = () => {
   const [wager, setWager] = useState(0);
@@ -31,111 +34,64 @@ const Page = () => {
   const { token } = useSelector((tok) => tok.tokens);
   const dispath = useDispatch();
   const [result, setResult] = useState([]);
+  const [difficulty, setDifficulty] = useState([1]);
 
   const [randomNumber, setRandomNumber] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [open, setOpen] = useState(false);
-  const [board, setBoard] = useState(
-    Array.from(
-      { length: 5 },
-      () => Array.from({ length: 5 }, () => Math.random() < 0.2) // 20% chance of being a mine
-    )
-  );
-  const [revealed, setRevealed] = useState(
-    Array.from({ length: 5 }, () => Array(5).fill(false))
-  );
-  const [selected, setSelected] = useState(
-    Array.from({ length: 5 }, () => Array(5).fill(false))
-  );
-  const [isSettingMines, setIsSettingMines] = useState(true);
 
-  const handleCellClick = (rowIndex, colIndex) => {
-    if (isSettingMines) {
-      // Toggle mine on cell click during mine setting mode
-      const newBoard = board.map((row, rIdx) =>
-        row.map((cell, cIdx) =>
-          rIdx === rowIndex && cIdx === colIndex ? !cell : cell
-        )
-      );
-      setBoard(newBoard);
-    } else {
-      // Toggle selection on click during selection mode
-      const newSelected = selected.map((row, rIdx) =>
-        row.map((cell, cIdx) =>
-          rIdx === rowIndex && cIdx === colIndex ? !cell : cell
-        )
-      );
-      setSelected(newSelected);
-    }
+  const [selectedMines, setSelectedMines] = useState([]);
+  const [minesState, setMinesState] = useState([]);
+  const [gameStarted, setGameStarted] = useState(false);
+
+  const handleClick = (row, col) => {
+    if (minesState.length > 0) return; // Disable selection if the game has started
+    const newSelection = [...selectedMines, [row, col]];
+    setSelectedMines(newSelection);
   };
 
-  const handleOpenCells = () => {
-    // Reveal selected cells
-    const newRevealed = revealed.map((row, rIdx) =>
-      row.map((cell, cIdx) => (selected[rIdx][cIdx] ? true : cell))
-    );
-    setRevealed(newRevealed);
-
-    // Reset the selected state
-    const newSelected = selected.map((row) => row.map(() => false));
-    setSelected(newSelected);
-
-    // Add any additional logic you need here
-    // For example, you might check for a win/loss condition
-    const hasLost = board.some((row, rIdx) =>
-      row.some((cell, cIdx) => cell && selected[rIdx][cIdx])
-    );
-    if (hasLost) {
-      alert("Game over! You hit a mine.");
-      // Reset the game or perform any other necessary actions
-    } else {
-      const allRevealed = newRevealed
-        .flat()
-        .every((cell, idx) => cell || board.flat()[idx]);
-      if (allRevealed) {
-        alert("Congratulations! You won.");
-        // Reset the game or perform any other necessary actions
-      }
+  const startGame = async () => {
+    if (gameStarted) {
+      alert("Please reset the game before starting a new one.");
+      return;
     }
-
-    const positions = findTruePositions(selected);
-    console.log(positions);
-
-    setTimeout(() => {
-      resetGame();
-    }, 2000);
+    // Call smart contract to send selected mines and fetch actual mine positions
+    const response = await fetchMinesFromContract(selectedMines);
+    setMinesState(response);
+    setGameStarted(true);
+    checkResults(response);
   };
-  function findTruePositions(arr) {
-    const truePositions = [];
-
-    arr.forEach((row, rowIndex) => {
-      row.forEach((element, colIndex) => {
-        if (element === true) {
-          truePositions.push([rowIndex, colIndex]);
-        }
-      });
-    });
-
-    return truePositions;
-  }
 
   const resetGame = () => {
-    setBoard(generateBoard());
-    setRevealed(Array.from({ length: 5 }, () => Array(5).fill(false)));
-    setSelected(Array.from({ length: 5 }, () => Array(5).fill(false)));
-    setIsSettingMines(true); // Reset to mine setting mode
+    setSelectedMines([]);
+    setMinesState([]);
+    setGameStarted(false);
   };
 
-  const handleStartGame = () => {
-    setIsSettingMines(false); // Switch to selection mode
+  const fetchMinesFromContract = async (selectedMines) => {
+    const arr = await playMineGame(
+      w0,
+      wager,
+      setToken,
+      ready,
+      dispath,
+      difficulty,
+      selectedMines
+    );
+    return arr;
   };
 
-  const play = () => {
-    playMineGame(w0, wager, setToken, ready, dispath);
-    // const ifValidInputs = inputChecks("all", wager, bet, value);
-    // console.log(ifValidInputs);
-    // if (!ifValidInputs) return;
-    // handleStartGame();
+  const checkResults = (mines) => {
+    // Check if the user has won or lost
+    const userMines = new Set(selectedMines.map(([r, c]) => `${r},${c}`));
+    let won = true;
+    for (const [r, c] of mines) {
+      if (userMines.has(`${r},${c}`)) {
+        won = false;
+        break;
+      }
+    }
+    alert(won ? "You Win!" : "You Lose!");
   };
 
   useEffect(() => {
@@ -163,7 +119,7 @@ const Page = () => {
             type={"number"}
             value={wager}
           />
-          <GameInputForm
+          {/* <GameInputForm
             id={"bets"}
             label={"Bets"}
             onChange={(e) => setBet(e.target.value)}
@@ -189,7 +145,7 @@ const Page = () => {
               value={maxPayout}
               className={"cursor-not-allowed"}
             />
-          </div>
+          </div> */}
 
           {/* <div>
             <RadioGroup
@@ -208,7 +164,7 @@ const Page = () => {
             </RadioGroup>
           </div> */}
 
-          <Accordion
+          {/* <Accordion
             className="w-full lg:w-[unset] bg-white border-none shadow-none"
             type="single"
             collapsible
@@ -236,21 +192,42 @@ const Page = () => {
                 />
               </AccordionContent>
             </AccordionItem>
-          </Accordion>
-          {!isSettingMines ? (
+          </Accordion> */}
+          <SliderMines setValue={setDifficulty} value={difficulty} />
+          <div className="mb-4 clear-start w-full flex">
+            <Button
+              onClick={startGame}
+              className="px-4 py-2 bg-blue-600 text-white rounded mr-2 w-full"
+              disabled={selectedMines.length === 0}
+            >
+              Start Game
+            </Button>
+            <Button
+              onClick={resetGame}
+              className="px-4 py-2 bg-red-600 text-white rounded w-full"
+            >
+              Reset
+            </Button>
+          </div>
+          {/* {!isSettingMines ? (
             <Button onClick={handleOpenCells}>Open Selected Cells</Button>
           ) : (
             <PlayButton handler={play} tokens={token} />
-          )}
+          )} */}
         </div>
         <div className="md:flex hidden relative">
           <Mines
-            board={board}
-            handleCellClick={handleCellClick}
-            handleOpenCells={handleOpenCells}
-            revealed={revealed}
-            selected={selected}
-            isSettingMines={isSettingMines}
+            selectedMines={selectedMines}
+            setSelectedMines={setSelectedMines}
+            minesState={minesState}
+            setMinesState={setMinesState}
+            gameStarted={gameStarted}
+            setGameStarted={setGameStarted}
+            handleClick={handleClick}
+            startGame={startGame}
+            checkResults={checkResults}
+            resetGame={resetGame}
+            fetchMinesFromContract={fetchMinesFromContract}
           />
         </div>
       </div>
@@ -261,21 +238,22 @@ const Page = () => {
 export default Page;
 
 const Mines = ({
-  board,
-  handleCellClick,
-  handleOpenCells,
-  revealed,
-  selected,
-  isSettingMines,
+  selectedMines,
+  setSelectedMines,
+  minesState,
+  setMinesState,
+  gameStarted,
+  setGameStarted,
+  handleClick,
+  startGame,
+  checkResults,
+  resetGame,
+  fetchMinesFromContract,
 }) => {
-  const hiddenImg = "";
-  const selectedImg = "";
-  const revealedMineImg = "";
-  const revealedSafeImg = "";
   return (
     <div className="w-[550px] h-[550px] flex flex-col items-center justify-center">
       <div className="w-[475px] h-[475px]">
-        <div className="w-full h-full grid grid-cols-5 grid-rows-5 gap-4">
+        {/* <div className="w-full h-full grid grid-cols-5 grid-rows-5 gap-4">
           {board.map((row, rowIndex) =>
             row.map((cell, colIndex) => (
               <div
@@ -307,8 +285,56 @@ const Mines = ({
               </div>
             ))
           )}
+        </div> */}
+        <div className="grid grid-rows-5 grid-cols-5 gap-1">
+          {Array.from({ length: 5 }).map((_, row) =>
+            Array.from({ length: 5 }).map((_, col) => {
+              let color = "bg-blue-500";
+              if (selectedMines.some(([r, c]) => r === row && c === col)) {
+                color = "bg-yellow-500";
+              } else if (
+                minesState.length > 0 &&
+                minesState.some(([r, c]) => r === row && c === col)
+              ) {
+                color = "bg-red-500";
+              } else if (
+                minesState.length > 0 &&
+                !minesState.some(([r, c]) => r === row && c === col)
+              ) {
+                color = "bg-green-500";
+              }
+
+              return (
+                <div
+                  key={`${row}-${col}`}
+                  className={`w-full h-24 border-4 border-black rounded-base ${color}`}
+                  onClick={() => handleClick(row, col)}
+                ></div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
   );
 };
+
+export function SliderMines({ value, setValue, ...props }) {
+  return (
+    <div className="w-full flex flex-col items-start gap-2">
+      <div className="flex w-full items-center justify-between">
+        <Label>Difficulty</Label>
+        <Label>{value}</Label>
+      </div>
+
+      <Slider
+        defaultValue={value}
+        max={4}
+        step={1}
+        onValueChange={(e) => setValue(e)}
+        // className={`${value === 0 ? "bg-red-500" : ""}`}
+        {...props}
+      />
+    </div>
+  );
+}

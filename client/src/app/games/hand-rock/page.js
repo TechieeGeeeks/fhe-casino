@@ -20,8 +20,10 @@ import { playHandRock } from "@/utils/helpers/handrockHelpers";
 import { useDispatch } from "react-redux";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { setToken } from "@/redux/slices/tokenSlice";
+import RockPaperScissorsAlert from "@/modules/hand-rock/handrockAlert";
 
 const Page = () => {
+  const [open, setOpen] = useState(false);
   const [wager, setWager] = useState(0);
   const [bet, setBet] = useState(1);
   const [totalwager, setTotalwager] = useState(0);
@@ -33,6 +35,7 @@ const Page = () => {
   const [selectValue, setSelectValue] = useState("rock");
   const [userChoice, setUserChoice] = useState(0);
   const [gameOutcome, setGameOutcome] = useState(null);
+  const [results, setResults] = useState();
   const [result, setResult] = useState(1);
   const { wallets } = useWallets();
   const dispath = useDispatch();
@@ -43,6 +46,11 @@ const Page = () => {
     "/rock-hand/paper.svg",
     "/rock-hand/scissors.svg",
   ];
+  // const userImages = [
+  //   "/rock-hand/user/rock.svg",
+  //   "/rock-hand/user/paper.svg",
+  //   "/rock-hand/user/scissors.svg",
+  // ];
 
   const handleUserChoice = (choice) => {
     setSelectValue(choice);
@@ -68,20 +76,22 @@ const Page = () => {
       setToken,
       ready,
       dispath,
-      setIsPlaying
+      setIsPlaying,
+      stopPlaying,
     );
   };
 
-  const stopPlaying = () => {
+  const stopPlaying = (computerChoice) => {
     setIsPlaying(false);
-    const computerChoice = Math.floor(Math.random() * 3); // Randomly choose between 0, 1,
     // Determine game result
-    setResult(computerChoice);
-    const gameResult = determineGameResult(userChoice, computerChoice);
+    // setResult(computerChoice);
+    setOpen(true);
+    setResults([0, 1, 2, 0, 2, 1, 2, 1]);
+    // const gameResult = determineGameResult(userChoice, computerChoice);
 
-    if (gameResult === "win") {
-      confetti();
-    }
+    // if (gameResult === "win") {
+    //   confetti();
+    // }
   };
 
   const determineGameResult = (userChoice, computerChoice) => {
@@ -144,6 +154,12 @@ const Page = () => {
 
   return (
     <div>
+      <RockPaperScissorsAlert
+        open={open}
+        setOpen={setOpen}
+        results={results}
+        userChoice={userChoice}
+      />
       <main className="w-full grid items-center justify-center bg-white px-5 py-[150px] text-center font-bold bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px]">
         <div className="grid min-w-[90vw] gap-4 grid-cols-2">
           <div className="flex flex-col items-center w-full gap-4">

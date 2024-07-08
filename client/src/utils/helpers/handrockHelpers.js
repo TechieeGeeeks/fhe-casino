@@ -18,7 +18,8 @@ export const playHandRock = async (
   setToken,
   ready,
   dispath,
-  setIsPlaying
+  setIsPlaying,
+  stopPlaying,
 ) => {
   console.log("w0:", w0);
   console.log("wager:", wager);
@@ -79,9 +80,12 @@ export const playHandRock = async (
         );
         console.log("Random Number Array:", randomNumberArray);
         console.log("Number of Games:", numGames.toString());
+        setIsPlaying(false);
+        stopPlaying()
       }
     );
   } catch (error) {
+    setIsPlaying(false);
     console.log(error);
     toast({ title: "Error Occured!" });
   }
