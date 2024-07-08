@@ -19,7 +19,7 @@ export const playHandRock = async (
   ready,
   dispath,
   setIsPlaying,
-  stopPlaying,
+  stopPlaying
 ) => {
   console.log("w0:", w0);
   console.log("wager:", wager);
@@ -80,8 +80,10 @@ export const playHandRock = async (
         );
         console.log("Random Number Array:", randomNumberArray);
         console.log("Number of Games:", numGames.toString());
+        const modArr = randomNumberArray.map((num) => num % 3);
+
         setIsPlaying(false);
-        stopPlaying()
+        stopPlaying(modArr);
       }
     );
   } catch (error) {

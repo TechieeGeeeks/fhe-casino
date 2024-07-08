@@ -86,7 +86,7 @@ const Page = () => {
     // Determine game result
     // setResult(computerChoice);
     setOpen(true);
-    setResults([0, 1, 2, 0, 2, 1, 2, 1]);
+    setResults(computerChoice);
     // const gameResult = determineGameResult(userChoice, computerChoice);
 
     // if (gameResult === "win") {

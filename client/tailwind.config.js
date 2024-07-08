@@ -28,7 +28,8 @@ module.exports = {
       },
       colors: {
         bg: "#dfe5f2",
-        main: "#88aaee",
+        // main: "#88aaee",
+        main: "#2563EB",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

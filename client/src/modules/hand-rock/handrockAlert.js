@@ -60,15 +60,27 @@ const RockPaperScissorsAlert = ({ open, setOpen, userChoice, results }) => {
       frame();
     };
 
+    const didUserWin = (userChoice, result) => {
+      // Rock (0) beats Scissors (2)
+      // Scissors (2) beat Paper (1)
+      // Paper (1) beats Rock (0)
+      if (
+        (userChoice === 0 && result === 2) ||
+        (userChoice === 2 && result === 1) ||
+        (userChoice === 1 && result === 0)
+      ) {
+        return true;
+      }
+      return false;
+    };
+
     let timeouts = [];
     if (open && results) {
       setVisibleResults([]);
-      console.log(results);
       results.forEach((result, index) => {
         timeouts.push(
           setTimeout(() => {
-            console.log(compareVal, result);
-            if (result === compareVal) winning();
+            if (didUserWin(compareVal, result)) winning();
             setVisibleResults((prev) => [...prev, result]);
           }, index * 2000)
         );
