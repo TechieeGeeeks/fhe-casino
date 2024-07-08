@@ -7,6 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { inputChecks } from "@/lib/utils";
 import { setToken } from "@/redux/slices/tokenSlice";
@@ -33,15 +35,24 @@ const Page = () => {
   const [randomNumber, setRandomNumber] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [open, setOpen] = useState(false);
+  const [selectValue, setSelectValue] = useState("left");
+  const [userChoice, setUserChoice] = useState(false);
+  const handleUserChoice = (choice) => {
+    setSelectValue(choice);
+    if (choice === "left") setUserChoice(false);
+    if (choice === "right") setUserChoice(true);
+    // if (choice === "scissors") setUserChoice(2);
+  };
+
   const play = () => {
     const ifValidInputs = inputChecks("all", wager, bet, value);
     // console.log(ifValidInputs);
     if (!ifValidInputs) return;
-    playDiceGame(w0, wager, value);
+    playDiceGame(w0, wager, value, handleStop, userChoice);
     setIsGenerating(true);
-    setTimeout(() => {
-      handleStop();
-    }, 5000);
+    // setTimeout(() => {
+    //   handleStop();
+    // }, 5000);
   };
 
   useEffect(() => {
@@ -55,9 +66,9 @@ const Page = () => {
   }, [isGenerating]);
 
   // const handleStart = () => setIsGenerating(true);
-  const handleStop = () => {
+  const handleStop = (randNumber) => {
     setIsGenerating(false);
-    setRandomNumber(50);
+    setRandomNumber(randNumber);
   };
 
   useEffect(() => {
@@ -76,7 +87,7 @@ const Page = () => {
   return (
     <main className="relative flex flex-col items-center justify-center bg-white px-5 py-[150px] text-center font-bold bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px]">
       <div className="grid gap-4 grid-cols-2">
-        <div className="max-w-[70%] flex flex-col gap-4">
+        <div className="max-w-[70%] flex flex-col gap-4 min-h-[50vh] mt-10">
           <GameInputForm
             id={"wager"}
             label={"Wager"}
@@ -85,7 +96,7 @@ const Page = () => {
             type={"number"}
             value={wager}
           />
-          <GameInputForm
+          {/* <GameInputForm
             id={"bets"}
             label={"Bets"}
             onChange={(e) => setBet(e.target.value)}
@@ -111,7 +122,7 @@ const Page = () => {
               value={maxPayout}
               className={"cursor-not-allowed"}
             />
-          </div>
+          </div> */}
           <Slider
             defaultValue={value}
             value={value}
@@ -137,7 +148,7 @@ const Page = () => {
             </RadioGroup>
           </div> */}
 
-          <Accordion
+          {/* <Accordion
             className="w-full lg:w-[unset] bg-white border-none shadow-none"
             type="single"
             collapsible
@@ -165,12 +176,33 @@ const Page = () => {
                 />
               </AccordionContent>
             </AccordionItem>
-          </Accordion>
+          </Accordion> */}
+          <div className="grid place-items-start gap-2 bg-white border-2 border-black p-3 rounded-base">
+            <p className="pb-3">Select Side of the dice:</p>
+            <RadioGroup
+              value={selectValue}
+              onValueChange={handleUserChoice}
+              className="flex items-center justify-between w-full"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="left" id="left" />
+                <Label htmlFor="left" className="cursor-pointer">
+                  Left Side
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="right" className="cursor-pointer">
+                  Right Side
+                </Label>
+                <RadioGroupItem value="right" id="right" />
+              </div>
+            </RadioGroup>
+          </div>
           <PlayButton handler={play} tokens={token} />
         </div>
         <div className="md:flex hidden relative">
-          <div className="w-[550px] h-full flex items-center justify-center">
-            <div className="h-[200px] absolute w-[200px] rounded-3xl border-4 border-black bg-main flex items-center justify-center text-3xl">
+          <div className="w-[550px] h-full flex items-start justify-center">
+            <div className="h-[270px] absolute w-[270px] rounded-3xl mt-10 border-4 border-black bg-main flex items-center justify-center text-[6rem] text-white">
               {randomNumber}
             </div>
           </div>

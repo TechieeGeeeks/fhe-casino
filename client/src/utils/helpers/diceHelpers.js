@@ -4,8 +4,14 @@ import { diceABI, diceAddress } from "../contract";
 import { fetchTokens } from "./webHelpers";
 import { ready } from "localforage";
 
-export const playDiceGame = async (w0, wager, userChoiced) => {
-  const isOver = false; //false === peeche
+export const playDiceGame = async (
+  w0,
+  wager,
+  userChoiced,
+  handleStop,
+  isOver
+) => {
+  // const isOver = false; //false === peeche
   console.log("w0:", w0);
   console.log("wager:", wager);
   console.log("userChoiced:", userChoiced);
@@ -37,10 +43,12 @@ export const playDiceGame = async (w0, wager, userChoiced) => {
         console.log("Payout:", payout.toString());
         console.log("Token Address:", tokenAddress);
         console.log("diceValue:", diceValue);
+        handleStop(diceValue);
         // fetchTokens(w0, setToken, dispath);
       }
     );
   } catch (error) {
+    handleStop(45);
     console.log(error);
     toast({ title: "Error Occured!" });
   }
