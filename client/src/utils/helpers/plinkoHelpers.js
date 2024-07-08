@@ -40,7 +40,11 @@ export const playPlinkoGame = async (
         console.log("Token Address:", tokenAddress);
         console.log("Random Bits:", randomBits);
         console.log("Spin Payout:", spinPayout.toString());
+        const sum = randomBits.reduce((accumulator, currentValue) => {
+          return accumulator + (currentValue === 1 ? 1 : -1);
+        }, 0);
 
+        console.log(sum); // Output: 1
         // You can handle the event data here (e.g., update state, UI, etc.)
       }
     );
