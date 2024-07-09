@@ -23,7 +23,7 @@ contract SlotMachine is Ownable {
             IERC20(betTokenAddress).transferFrom(
                 msg.sender,
                 address(this),
-                10000 * 10 ** 18
+                100000 * 10 ** 18
             ),
             "Initial funding failed"
         );
