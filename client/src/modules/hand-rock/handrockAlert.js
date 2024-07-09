@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import { motion, useAnimation } from "framer-motion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,12 +11,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import confetti from "canvas-confetti";
 
-const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
-  const [visibleCoins, setVisibleCoins] = useState([]);
-  const controls = useAnimation();
-  console.log(userChoice)
+const images = [
+  "/rock-hand/rock.svg",
+  "/rock-hand/paper.svg",
+  "/rock-hand/scissors.svg",
+];
+
+const RockPaperScissorsAlert = ({ open, setOpen, userChoice, results }) => {
+  const [visibleResults, setVisibleResults] = useState([]);
   const [skipAnimation, setSkipAnimation] = useState(false);
-  const compareVal = userChoice === "heads" ? 1 : 0;
+  const compareVal = userChoice;
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -57,16 +60,28 @@ const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
       frame();
     };
 
+    const didUserWin = (userChoice, result) => {
+      // Rock (0) beats Scissors (2)
+      // Scissors (2) beat Paper (1)
+      // Paper (1) beats Rock (0)
+      if (
+        (userChoice === 0 && result === 2) ||
+        (userChoice === 2 && result === 1) ||
+        (userChoice === 1 && result === 0)
+      ) {
+        return true;
+      }
+      return false;
+    };
+
     let timeouts = [];
-    if (open && coins) {
-      setVisibleCoins([]);
-      console.log(coins);
-      coins.forEach((coin, index) => {
+    if (open && results) {
+      setVisibleResults([]);
+      results.forEach((result, index) => {
         timeouts.push(
           setTimeout(() => {
-            console.log(compareVal, coin);
-            if (coin === compareVal) winning();
-            setVisibleCoins((prev) => [...prev, coin]);
+            if (didUserWin(compareVal, result)) winning();
+            setVisibleResults((prev) => [...prev, result]);
           }, index * 2000)
         );
       });
@@ -75,7 +90,7 @@ const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
     return () => {
       timeouts.forEach((timeout) => clearTimeout(timeout));
     };
-  }, [open, coins, compareVal, skipAnimation]);
+  }, [open, results, compareVal, skipAnimation]);
 
   const close = () => setOpen(false);
   const handleSkipAnimation = () => {
@@ -91,31 +106,32 @@ const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
           <AlertDialogDescription className="h-[55vh] overflow-y-scroll no-scrollbar p-4 border-2 border-black scroll-smooth">
             {skipAnimation ? (
               <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-                {coins.map((coin, index) => (
+                {results.map((result, index) => (
                   <div
                     key={index}
-                    className={`w-full aspect-square rounded-full flex items-center justify-center shadow-base border-2 border-black ${
-                      coin === 1 ? "bg-main" : "bg-white"
-                    } font-semibold`}
+                    className="w-full aspect-square rounded-full flex items-center justify-center"
                   >
-                    {coin === 1 ? "Heads" : "Tails"}
+                    <img
+                      src={images[result]}
+                      alt={`Result ${result}`}
+                      className="w-full h-full"
+                    />
                   </div>
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-                {visibleCoins.map((coin, index) => (
-                  <motion.div
+                {visibleResults.map((result, index) => (
+                  <div
                     key={index}
-                    initial={{ rotateY: 0 }}
-                    animate={{ rotateY: 1440 }}
-                    transition={{ duration: 2 }}
-                    className={`w-full aspect-square rounded-full flex items-center justify-center shadow-base border-2 border-black ${
-                      coin === 1 ? "bg-main" : "bg-white"
-                    } font-semibold`}
+                    className="w-full aspect-square rounded-full flex items-center justify-center"
                   >
-                    {coin === 1 ? "Heads" : "Tails"}
-                  </motion.div>
+                    <img
+                      src={images[result]}
+                      alt={`Result ${result}`}
+                      className="w-full h-full"
+                    />
+                  </div>
                 ))}
               </div>
             )}
@@ -139,4 +155,4 @@ const CoinFlipAlert = ({ open, setOpen, userChoice, coins }) => {
   );
 };
 
-export default CoinFlipAlert;
+export default RockPaperScissorsAlert;

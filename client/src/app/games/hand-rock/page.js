@@ -16,8 +16,14 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import GameInputForm from "@/components/GameInputForm";
 import PlayButton from "@/components/PlayButton";
+import { playHandRock } from "@/utils/helpers/handrockHelpers";
+import { useDispatch } from "react-redux";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { setToken } from "@/redux/slices/tokenSlice";
+import RockPaperScissorsAlert from "@/modules/hand-rock/handrockAlert";
 
 const Page = () => {
+  const [open, setOpen] = useState(false);
   const [wager, setWager] = useState(0);
   const [bet, setBet] = useState(1);
   const [totalwager, setTotalwager] = useState(0);
@@ -29,13 +35,22 @@ const Page = () => {
   const [selectValue, setSelectValue] = useState("rock");
   const [userChoice, setUserChoice] = useState(0);
   const [gameOutcome, setGameOutcome] = useState(null);
+  const [results, setResults] = useState();
   const [result, setResult] = useState(1);
-
+  const { wallets } = useWallets();
+  const dispath = useDispatch();
+  const { ready } = usePrivy();
+  const w0 = wallets[0];
   const images = [
     "/rock-hand/rock.svg",
     "/rock-hand/paper.svg",
     "/rock-hand/scissors.svg",
   ];
+  // const userImages = [
+  //   "/rock-hand/user/rock.svg",
+  //   "/rock-hand/user/paper.svg",
+  //   "/rock-hand/user/scissors.svg",
+  // ];
 
   const handleUserChoice = (choice) => {
     setSelectValue(choice);
@@ -51,19 +66,32 @@ const Page = () => {
       });
       return;
     }
-    setIsPlaying(true);
+    playHandRock(
+      w0,
+      wager,
+      bet,
+      userChoice,
+      takeprofit ? takeprofit : maxPayout.toString(),
+      stopOnLoss,
+      setToken,
+      ready,
+      dispath,
+      setIsPlaying,
+      stopPlaying,
+    );
   };
 
-  const stopPlaying = () => {
+  const stopPlaying = (computerChoice) => {
     setIsPlaying(false);
-    const computerChoice = Math.floor(Math.random() * 3); // Randomly choose between 0, 1,
     // Determine game result
-    setResult(computerChoice);
-    const gameResult = determineGameResult(userChoice, computerChoice);
+    // setResult(computerChoice);
+    setOpen(true);
+    setResults(computerChoice);
+    // const gameResult = determineGameResult(userChoice, computerChoice);
 
-    if (gameResult === "win") {
-      confetti();
-    }
+    // if (gameResult === "win") {
+    //   confetti();
+    // }
   };
 
   const determineGameResult = (userChoice, computerChoice) => {
@@ -81,14 +109,28 @@ const Page = () => {
   };
 
   useEffect(() => {
-    if (isPlaying) {
-      const timeout = setTimeout(() => {
-        stopPlaying();
-      }, 2000);
+    // Calculate total wager and round to nearest integer
+    setTotalwager(Math.round(wager * bet));
+  }, [wager, bet]);
 
-      return () => clearTimeout(timeout);
+  useEffect(() => {
+    if (takeprofit !== 0 && takeprofit !== undefined) {
+      setMaxPayout(Math.round(takeprofit));
+    } else if (takeprofit === 0 && takeprofit !== undefined) {
+      const calculatedPayout = Math.round(wager * bet * 1.98);
+      setMaxPayout(calculatedPayout);
     }
-  }, [isPlaying]);
+  }, [wager, bet, takeprofit]);
+
+  // useEffect(() => {
+  //   if (isPlaying) {
+  //     const timeout = setTimeout(() => {
+  //       stopPlaying();
+  //     }, 2000);
+
+  //     return () => clearTimeout(timeout);
+  //   }
+  // }, [isPlaying]);
 
   useEffect(() => {
     if (gameOutcome === "win") {
@@ -112,6 +154,12 @@ const Page = () => {
 
   return (
     <div>
+      <RockPaperScissorsAlert
+        open={open}
+        setOpen={setOpen}
+        results={results}
+        userChoice={userChoice}
+      />
       <main className="w-full grid items-center justify-center bg-white px-5 py-[150px] text-center font-bold bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px]">
         <div className="grid min-w-[90vw] gap-4 grid-cols-2">
           <div className="flex flex-col items-center w-full gap-4">

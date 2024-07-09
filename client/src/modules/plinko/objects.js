@@ -23,6 +23,8 @@ const MULTIPLIERS = {
   13: 1.8,
   14: 1.9,
   15: 2,
+  16: 2.1,
+  17: 2.2,
 };
 
 export const createObstacles = () => {

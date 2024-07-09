@@ -1,10 +1,14 @@
 import { toast } from "@/components/ui/use-toast";
 import { Contract, ethers } from "ethers";
-import { coinFlipAddress, conflipABI } from "../contract";
+import {
+  coinFlipAddress,
+  conflipABI,
+  handRockABI,
+  handRockAddress,
+} from "../contract";
 import { fetchTokens } from "./webHelpers";
-import { ready } from "localforage";
 
-export const playFlipGame = async (
+export const playHandRock = async (
   w0,
   wager,
   bets,
@@ -14,9 +18,8 @@ export const playFlipGame = async (
   setToken,
   ready,
   dispath,
-  stopFlipping,
-  setResult,
-  setOpen
+  setIsPlaying,
+  stopPlaying
 ) => {
   console.log("w0:", w0);
   console.log("wager:", wager);
@@ -24,7 +27,9 @@ export const playFlipGame = async (
   console.log("userChoiced:", userChoiced);
   console.log("stopGain:", stopGain);
   console.log("stopLoss:", stopLoss);
+  console.log("userchoice: ", userChoiced);
 
+  setIsPlaying(true);
   const provider = await w0?.getEthersProvider();
   const signer = await provider?.getSigner();
 
@@ -33,54 +38,56 @@ export const playFlipGame = async (
   let contractStopLoss = "0";
   if (stopGain) contractStopGain = ethers.utils.parseUnits(stopGain, "ether");
   if (stopLoss) contractStopLoss = ethers.utils.parseUnits(stopLoss, "ether");
-  const contractUserChoice = userChoiced === "heads" ? true : false;
+  const contractUserChoice = userChoiced;
 
   console.log("contractWager:", contractWager.toString());
   console.log("contractStopGain:", contractStopGain.toString());
   console.log("contractStopLoss:", contractStopLoss.toString());
   console.log("contractUserChoice:", contractUserChoice);
 
-  const contract = new Contract(coinFlipAddress, conflipABI, signer);
+  const contract = new Contract(handRockAddress, handRockABI, signer);
   try {
-    const txReceipt = await contract.COINFLIP_PLAY(
+    const txReceipt = await contract.ROCKPAPERSCISSORS_PLAY(
       contractWager,
       contractUserChoice,
       bets,
       contractStopGain,
       contractStopLoss,
       {
-        gasLimit: ethers.BigNumber.from("7920027"), 
+        gasLimit: 7920027,
       }
     );
 
     contract.on(
-      "CoinFlip_Outcome_Event",
+      "RockPaperScissors_Outcome_Event",
       (
-        player,
+        playerAddress,
         wager,
         payout,
         tokenAddress,
-        coinResults,
-        individualPayouts,
-        numGames,
+        payouts,
+        randomNumberArray,
+        numGames
       ) => {
-        console.log("CoinFlip_Outcome_Event:", {
-          player,
-          wager: wager.toString(),
-          payout: payout.toString(),
-          tokenAddress,
-          coinResults,
-          individualPayouts,
-          numGames: numGames.toString(),
-        });
-        // setResult(() => coinResults);
-        setOpen(true);
-        fetchTokens(w0, setToken, ready, dispath);
-        stopFlipping(coinResults);
+        console.log("RockPaperScissors_Outcome_Event triggered");
+        console.log("Player Address:", playerAddress);
+        console.log("Wager:", wager.toString());
+        console.log("Payout:", payout.toString());
+        console.log("Token Address:", tokenAddress);
+        console.log(
+          "Payouts:",
+          payouts.map((p) => p.toString())
+        );
+        console.log("Random Number Array:", randomNumberArray);
+        console.log("Number of Games:", numGames.toString());
+        const modArr = randomNumberArray.map((num) => num % 3);
+
+        setIsPlaying(false);
+        stopPlaying(modArr);
       }
     );
   } catch (error) {
-    stopFlipping("Coin");
+    setIsPlaying(false);
     console.log(error);
     toast({ title: "Error Occured!" });
   }

@@ -3,44 +3,44 @@ import { Contract, ethers } from "ethers";
 import { coinFlipAddress, tokenABI, tokenContractAddress } from "../contract";
 import { fetchTokens } from "./webHelpers";
 
-export const approveTokens = async (
-  w0,
-  setLoading,
-  setIsMintLoading,
-  setCrntState,
-  crntState,
-  address
-) => {
-  setIsMintLoading(false);
-  const provider = await w0?.getEthersProvider();
-  const signer = await provider?.getSigner();
-  const contract = new Contract(tokenContractAddress, tokenABI, signer);
-  setLoading(() => true);
-  setCrntState(() => 0);
-  try {
-    const receipt = await contract.approve(
-      coinFlipAddress,
-      "10000000000000000000000000000000000"
-    );
-    let count = 0;
-    contract.on("Approval", (owner, spender, value) => {
-      if (owner === w0.address) {
-        count++;
-        if (count == 1) {
-          setCrntState(() => 2);
-          setTimeout(() => {
-            setLoading(() => false);
-            toast({ title: "Tokens minted successfully!" });
-          }, 1000);
-        }
-      }
-    });
-  } catch (error) {
-    setLoading(false);
-    console.log(error);
-    toast({ title: "Error Occured!" });
-  }
-};
+// export const approveTokens = async (
+//   w0,
+//   setLoading,
+//   setIsMintLoading,
+//   setCrntState,
+//   crntState,
+//   address
+// ) => {
+//   setIsMintLoading(false);
+//   const provider = await w0?.getEthersProvider();
+//   const signer = await provider?.getSigner();
+//   const contract = new Contract(tokenContractAddress, tokenABI, signer);
+//   setLoading(() => true);
+//   setCrntState(() => 0);
+//   try {
+//     const receipt = await contract.approve(
+//       tokenContractAddress,
+//       "10000000000000000000000000000000000"
+//     );
+//     let count = 0;
+//     contract.on("Approval", (owner, spender, value) => {
+//       if (owner === w0.address) {
+//         count++;
+//         if (count == 1) {
+//           setCrntState(() => 2);
+//           setTimeout(() => {
+//             setLoading(() => false);
+//             toast({ title: "Tokens minted successfully!" });
+//           }, 1000);
+//         }
+//       }
+//     });
+//   } catch (error) {
+//     setLoading(false);
+//     console.log(error);
+//     toast({ title: "Error Occured!" });
+//   }
+// };
 
 export const mintToken = async (
   w0,
@@ -80,6 +80,7 @@ export const mintToken = async (
       }
     });
   } catch (error) {
+    console.log(error)
     toast({ title: "Error Occured!" });
     setLoading(false);
     setIsMintLoading(() => false);

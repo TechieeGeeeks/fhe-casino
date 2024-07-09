@@ -1,6 +1,5 @@
 import Link from "next/link";
 import React from "react";
-import { GiPokerHand } from "react-icons/gi";
 import { FaCircleDollarToSlot } from "react-icons/fa6";
 import { LiaHandRock } from "react-icons/lia";
 import { LuCoins } from "react-icons/lu";
@@ -74,12 +73,12 @@ const items = [
     hoverIcon: <LuCoins className="text-[6rem]" />,
     href: "/games/coin-flip",
   },
-  {
-    title: "Poker",
-    displayIcon: <GiPokerHand className="text-[3rem]" />,
-    hoverIcon: <GiPokerHand className="text-[6rem]" />,
-    href: "/games/poker-hand",
-  },
+  // {
+  //   title: "Poker",
+  //   displayIcon: <GiPokerHand className="text-[3rem]" />,
+  //   hoverIcon: <GiPokerHand className="text-[6rem]" />,
+  //   href: "/games/poker-hand",
+  // },
   {
     title: "Slots",
     displayIcon: <FaCircleDollarToSlot className="text-[2rem]" />,
