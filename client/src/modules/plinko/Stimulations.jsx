@@ -22,6 +22,7 @@ export function Simulation() {
     13: [],
     14: [],
     15: [],
+    16: [],
   });
 
   async function simulate(ballManager) {
@@ -29,7 +30,7 @@ export function Simulation() {
     while (true) {
       i++;
       ballManager.addBall(pad(WIDTH / 2 + 20 * (Math.random() - 0.5)));
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
   }
 
@@ -53,7 +54,7 @@ export function Simulation() {
       };
     }
   }, [canvasRef]);
-  console.log(outputs)
+  console.log(outputs);
 
   return (
     <div className="flex flex-col mt-40 lg:flex-row items-center justify-between text-black overflow-auto">
