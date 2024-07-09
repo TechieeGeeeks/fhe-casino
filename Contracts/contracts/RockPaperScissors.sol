@@ -115,6 +115,7 @@ error ZeroWager();
                 payouts[i] = wager;
                 totalValue += int256(payouts[i]);
             } else if (
+                // 0 = rock , 1 = paper , 2 = scissor
                 (action == 0 && randomActions[i] == 2) ||
                 (action == 1 && randomActions[i] == 0) ||
                 (action == 2 && randomActions[i] == 1)
