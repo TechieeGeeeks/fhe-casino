@@ -17,6 +17,8 @@ import { playPlinkoGame } from "@/utils/helpers/plinkoHelpers";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useDispatch } from "react-redux";
 import { setToken } from "@/redux/slices/tokenSlice";
+import { simulationData } from "@/utils/simulation";
+import { toast } from "@/components/ui/use-toast";
 const Page = () => {
   const [isFlipping, setIsFlipping] = useState(false);
   const [isBtnDisbled, setIsBtnDisbled] = useState(false);
@@ -36,11 +38,55 @@ const Page = () => {
   const w0 = wallets[0];
   const [result, setResult] = useState();
 
-  const handlePlay = () => {
-    playPlinkoGame(w0, wager, setToken, ready, dispath, setResult);
-    // if (ballManager) {
-    //   ballManager.addBall(3919792.5329278745);
-    // }
+  const mappedPlinkoData = {
+    "-8": simulationData[0],
+    "-7": simulationData[1],
+    "-6": simulationData[2],
+    "-5": simulationData[3],
+    "-4": simulationData[4],
+    "-3": simulationData[5],
+    "-2": simulationData[6],
+    "-1": simulationData[7],
+    0: simulationData[8],
+    1: simulationData[9],
+    2: simulationData[10],
+    3: simulationData[11],
+    4: simulationData[12],
+    5: simulationData[13],
+    6: simulationData[14],
+    7: simulationData[15],
+    8: simulationData[16],
+  };
+  const [loading, setLoading] = useState(false);
+
+  const handlePlay = async () => {
+    if (!wager) {
+      toast({
+        title: "Please, add valid wager",
+      });
+      return;
+    }
+    // setLoading(() => true);
+    toast({ title: "We are waiting for your transaction to be confirmed." });
+    const sum = await playPlinkoGame(
+      w0,
+      wager,
+      setToken,
+      ready,
+      dispath,
+      setResult
+    );
+    // setLoading(() => false);
+    if (!sum) return;
+    // console.log(sum);
+    const arrayToBePicked = mappedPlinkoData[sum];
+    // console.log(arrayToBePicked);
+    const randomIndex = Math.floor(Math.random() * arrayToBePicked.length);
+    // console.log(randomIndex);
+    const randomValue = arrayToBePicked[randomIndex];
+    if (ballManager) {
+      ballManager.addBall(randomValue);
+    }
   };
 
   useEffect(() => {
@@ -121,9 +167,15 @@ const Page = () => {
             </Accordion> */}
             <PlayButton handler={handlePlay} />
           </div>
-          <div className="md:flex  relative">
-            <div className="w-[550px]">
-              <PlinkoGame canvasRef={canvasRef} />
+          <div className="md:flex relative">
+            <div className="w-[550px] -mt-16">
+              {loading ? (
+                <div className="w-full h-[200px] bg-muted border flex items-center justify-center mt-32">
+                  We are waiting for your transaction to be confirmed.
+                </div>
+              ) : (
+                <PlinkoGame canvasRef={canvasRef} />
+              )}
             </div>
           </div>
         </div>

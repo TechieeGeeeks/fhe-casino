@@ -103,20 +103,14 @@ export class BallManager {
     });
   }
   getColor(index) {
-    if (index < 3 || index > this.sinks.length - 3) {
-      return { background: "#B0C4DE", color: "black" };
+    if (index < 3 || index > this.sinks.length - 4) {
+      return { background: "#2563EB", color: "white" };
     }
-    if (index < 6 || index > this.sinks.length - 6) {
-      return { background: "#F0F8FF", color: "black" };
+    if (index < 6 || index > this.sinks.length - 7) {
+      return { background: "#6692F1", color: "black" };
     }
     if (index < 9 || index > this.sinks.length - 9) {
-      return { background: "#ffbf00", color: "black" };
-    }
-    if (index < 12 || index > this.sinks.length - 12) {
-      return { background: "#ffff00", color: "black" };
-    }
-    if (index < 15 || index > this.sinks.length - 15) {
-      return { background: "#bfff00", color: "black" };
+      return { background: "white", color: "black" };
     }
     return { background: "#7fff00", color: "black" };
   }
@@ -170,7 +164,7 @@ export class BallManager {
 
       // Fill the text color for multiplier
       this.ctx.fillStyle = this.getColor(i).color;
-      this.ctx.font = "bold 12px Arial";
+      this.ctx.font = "bold 10px Arial";
       this.ctx.fillText(
         sink?.multiplier?.toString() + "x",
         sink.x - 15 + sinkWidth / 2,
